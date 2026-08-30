@@ -1,6 +1,5 @@
 document.addEventListener("DOMContentLoaded", () => {
     
-    // Generates a brand new master seed every time the website is opened!
     let masterSeed = Math.random() * 10000;
     let currentSeed;
     
@@ -18,12 +17,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 const suffix = e.target.getAttribute("data-suffix");
                 document.getElementById(`val-${targetId}`).innerHTML = `${e.target.value}${suffix}`;
             }
-            
-            // Generate a completely new layout if the user changes the Design Mode
-            if (e.target.id === "design-mode") {
-                masterSeed = Math.random() * 10000;
-            }
-            
+            if (e.target.id === "design-mode") masterSeed = Math.random() * 10000;
             generateDesigns();
         });
     });
@@ -36,20 +30,7 @@ document.addEventListener("DOMContentLoaded", () => {
             const dist = r + (seededRandom() - 0.5) * c;
             const x = cx + Math.cos(angle) * dist;
             const y = cy + Math.sin(angle) * dist;
-            if (i === 0) ctx.moveTo(x, y);
-            else ctx.lineTo(x, y);
-        }
-        ctx.closePath();
-    }
-
-    function drawHexagon(ctx, x, y, r) {
-        ctx.beginPath();
-        for (let i = 0; i < 6; i++) {
-            const angle = (Math.PI / 3) * i;
-            const hx = x + r * Math.cos(angle);
-            const hy = y + r * Math.sin(angle);
-            if (i === 0) ctx.moveTo(hx, hy);
-            else ctx.lineTo(hx, hy);
+            if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
         }
         ctx.closePath();
     }
@@ -63,7 +44,6 @@ document.addEventListener("DOMContentLoaded", () => {
         const chaos = parseInt(document.getElementById("chaos").value);
         const thickness = parseInt(document.getElementById("thickness").value);
 
-        // Hide unused posters
         document.querySelectorAll(".poster").forEach((el, i) => el.style.display = i < posterCount ? "block" : "none");
 
         const palettes = [
@@ -76,9 +56,8 @@ document.addEventListener("DOMContentLoaded", () => {
         document.querySelectorAll(".poster canvas").forEach((canvas, index) => {
             if (index >= posterCount) return;
 
-            // THE FIX: Give each canvas its own unique mathematical starting point
-            // This guarantees Canvas 1, 2, 3, and 4 will always draw entirely different shapes!
             currentSeed = masterSeed + (index * 9999);
+            const uniqueOffset = seededRandom() * 1000;
 
             const ctx = canvas.getContext("2d");
             const width = canvas.width;
@@ -98,11 +77,183 @@ document.addEventListener("DOMContentLoaded", () => {
 
             ctx.lineWidth = thickness / 5;
             ctx.lineJoin = "round";
+            ctx.lineCap = "round";
 
-            // Grab a unique offset for grid-based patterns so they don't look identical
-            const uniqueOffset = seededRandom() * 1000;
+            // ==========================================
+            // NEW COMBO AESTHETICS
+            // ==========================================
 
-            if (designMode === "watercolor") {
+            if (designMode === "retro-bubble") {
+                for (let i = 0; i < density * 1.5; i++) {
+                    const x = seededRandom() * width;
+                    const y = seededRandom() * height;
+                    const r = (amplitude / 3) + (seededRandom() * amplitude);
+                    const hue = (palettes[index].strokeHue + seededRandom() * 60) % 360;
+                    
+                    // Retro misregistered print shadow
+                    const offset = chaos / 4;
+                    ctx.fillStyle = `hsla(${hue}, 80%, 50%, 0.8)`;
+                    ctx.beginPath(); ctx.arc(x - offset, y + offset, r, 0, Math.PI * 2); ctx.fill();
+                    
+                    // Crisp outline Bubble
+                    ctx.strokeStyle = '#fff';
+                    ctx.lineWidth = thickness / 3;
+                    ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); ctx.stroke();
+                }
+            }
+            
+            else if (designMode === "mandala-sacred") {
+                const layers = Math.max(3, Math.floor(density / 2));
+                for (let i = 1; i <= layers; i++) {
+                    const r = (width * 0.8) * (i / layers) * (amplitude / 100);
+                    ctx.strokeStyle = `hsl(${(palettes[index].strokeHue + i * 15) % 360}, 100%, 75%)`;
+                    
+                    // Symmetrical circle
+                    ctx.beginPath(); ctx.arc(centerX, centerY, r, 0, Math.PI * 2); ctx.stroke();
+                    
+                    // Intersecting sacred geometry polygons
+                    const sides = 3 + Math.floor(chaos / 15);
+                    if (i % 2 === 0 || chaos > 50) {
+                        ctx.beginPath();
+                        for (let s = 0; s <= sides; s++) {
+                            // Rotate differently per canvas and layer
+                            const angle = (s * (Math.PI * 2) / sides) + (uniqueOffset / 10) + (i * 0.2);
+                            const px = centerX + r * Math.cos(angle);
+                            const py = centerY + r * Math.sin(angle);
+                            if (s === 0) ctx.moveTo(px, py); else ctx.lineTo(px, py);
+                        }
+                        ctx.stroke();
+                    }
+                }
+            }
+
+            else if (designMode === "y2k-chrome") {
+                // 1. Wireframe Globe background
+                ctx.strokeStyle = 'rgba(255, 255, 255, 0.2)';
+                const rings = Math.floor(density / 3) + 3;
+                for (let w = 0; w < rings; w++) {
+                    ctx.beginPath();
+                    ctx.ellipse(centerX, centerY, amplitude + (w * 15), (amplitude / 2) + (chaos * w) + 10, uniqueOffset, 0, Math.PI * 2);
+                    ctx.stroke();
+                }
+
+                // 2. Chrome Starbursts
+                for (let i = 0; i < density; i++) {
+                    const x = seededRandom() * width;
+                    const y = seededRandom() * height;
+                    const size = (amplitude / 3) + seededRandom() * amplitude;
+                    
+                    // Metallic gradient fill
+                    const starGrad = ctx.createRadialGradient(x, y, 0, x, y, size);
+                    starGrad.addColorStop(0, '#ffffff');
+                    starGrad.addColorStop(0.5, `hsl(${palettes[index].strokeHue}, 20%, 70%)`);
+                    starGrad.addColorStop(1, `hsl(${palettes[index].strokeHue}, 50%, 20%)`);
+                    
+                    ctx.fillStyle = starGrad;
+                    ctx.strokeStyle = '#fff';
+                    ctx.lineWidth = thickness / 5;
+                    
+                    ctx.beginPath();
+                    for (let s = 0; s < 8; s++) {
+                        const angle = s * Math.PI / 4 + uniqueOffset;
+                        const dist = (s % 2 === 0) ? size : size / 4;
+                        const px = x + Math.cos(angle) * dist;
+                        const py = y + Math.sin(angle) * dist;
+                        if (s === 0) ctx.moveTo(px, py); else ctx.lineTo(px, py);
+                    }
+                    ctx.fill(); ctx.stroke();
+                }
+            }
+
+            else if (designMode === "floral-mandala") {
+                const petals = 6 + Math.floor(chaos / 10);
+                for (let i = density; i > 0; i--) {
+                    const r = i * (amplitude / 4) + 10;
+                    ctx.fillStyle = `hsla(${(palettes[index].strokeHue + i * 20) % 360}, 80%, 60%, 0.6)`;
+                    ctx.strokeStyle = `hsl(${(palettes[index].strokeHue + 180) % 360}, 100%, 85%)`; // Complementary outline
+                    
+                    for (let p = 0; p < petals; p++) {
+                        const angle = (p * Math.PI * 2 / petals) + (i * 0.15) + uniqueOffset;
+                        const px = centerX + (r * 0.7) * Math.cos(angle);
+                        const py = centerY + (r * 0.7) * Math.sin(angle);
+                        
+                        ctx.beginPath();
+                        ctx.ellipse(px, py, r / 1.5, r / 4, angle, 0, Math.PI * 2);
+                        ctx.fill(); ctx.stroke();
+                    }
+                }
+            }
+
+            else if (designMode === "memphis-geo") {
+                for (let i = 0; i < density * 1.5; i++) {
+                    const shapeType = Math.floor(seededRandom() * 4);
+                    const x = seededRandom() * width;
+                    const y = seededRandom() * height;
+                    const size = (amplitude / 4) + seededRandom() * (amplitude / 1.5);
+                    
+                    ctx.fillStyle = `hsl(${(palettes[index].strokeHue + seededRandom() * 120) % 360}, 90%, 60%)`;
+                    ctx.strokeStyle = '#111'; // Heavy dark borders characteristic of Memphis
+                    ctx.lineWidth = thickness / 2.5;
+
+                    ctx.save();
+                    ctx.translate(x, y);
+                    ctx.rotate(seededRandom() * Math.PI * 2); // Random rotation
+
+                    if (shapeType === 0) {
+                        // Pill / Capsule
+                        ctx.beginPath(); ctx.roundRect(-size, -size/2, size*2, size, size/2); ctx.fill(); ctx.stroke();
+                    } else if (shapeType === 1) {
+                        // Squiggle
+                        ctx.beginPath();
+                        for(let sq = 0; sq < 5; sq++){
+                            const sx = (sq - 2) * (size / 1.5);
+                            const sy = (sq % 2 === 0) ? size/2 : -size/2;
+                            if(sq === 0) ctx.moveTo(sx, sy); else ctx.lineTo(sx, sy);
+                        }
+                        ctx.stroke();
+                    } else if (shapeType === 2) {
+                        // Sharp Triangle
+                        ctx.beginPath();
+                        ctx.moveTo(0, -size); ctx.lineTo(size, size); ctx.lineTo(-size, size); ctx.closePath();
+                        ctx.fill(); ctx.stroke();
+                    } else {
+                        // Floating dots
+                        ctx.fillStyle = '#111';
+                        ctx.beginPath(); ctx.arc(0, 0, thickness, 0, Math.PI*2); ctx.fill();
+                    }
+                    ctx.restore();
+                }
+            }
+
+            else if (designMode === "psychedelic") {
+                // Saturated lava-lamp blobs
+                for (let i = density; i > 0; i--) {
+                    // Intense rainbow cycle
+                    ctx.fillStyle = `hsl(${(palettes[index].strokeHue + i * (360 / density) + (uniqueOffset * 10)) % 360}, 90%, 55%)`; 
+                    const r = i * (amplitude / 3) + 20;
+                    
+                    ctx.beginPath();
+                    const points = 20;
+                    for (let p = 0; p <= points; p++) {
+                        const angle = p * (Math.PI * 2) / points;
+                        // Extreme warping
+                        const warp = Math.sin(angle * (chaos / 6) + uniqueOffset) * (chaos * 1.5);
+                        const px = centerX + (r + warp) * Math.cos(angle);
+                        const py = centerY + (r + warp) * Math.sin(angle);
+                        if (p === 0) ctx.moveTo(px, py); else ctx.lineTo(px, py);
+                    }
+                    ctx.closePath();
+                    ctx.fill();
+                    ctx.strokeStyle = 'rgba(0,0,0,0.3)'; // Soft inner shadow border
+                    ctx.stroke();
+                }
+            }
+            
+            // ==========================================
+            // ORIGINAL AESTHETICS (Kept a few classics)
+            // ==========================================
+            
+            else if (designMode === "watercolor") {
                 for (let i = 0; i < density * 2; i++) {
                     const x = seededRandom() * width;
                     const y = seededRandom() * height;
@@ -117,50 +268,17 @@ document.addEventListener("DOMContentLoaded", () => {
                     ctx.strokeStyle = `hsl(${hue}, 100%, 85%)`;
                     ctx.stroke();
                 }
-            } 
-            
-            else if (designMode === "fluid" || designMode === "blob") {
+            }
+            else if (designMode === "fluid") {
                 for (let i = 0; i < density / 2; i++) {
                     const r = (amplitude) + (seededRandom() * 50);
                     const x = centerX + (seededRandom() - 0.5) * chaos * 2;
                     const y = centerY + (seededRandom() - 0.5) * chaos * 2;
                     createBlobPath(ctx, x, y, r, chaos);
-                    
-                    if (designMode === "fluid") {
-                        ctx.fillStyle = `hsla(${(palettes[index].strokeHue + i * 20)%360}, 80%, 60%, 0.5)`;
-                        ctx.fill();
-                    } else {
-                        ctx.strokeStyle = `hsl(${(palettes[index].strokeHue + i * 15)%360}, 100%, 75%)`;
-                        ctx.stroke();
-                    }
-                }
-            } 
-            
-            else if (designMode === "liquid" || designMode === "mesh") {
-                ctx.filter = designMode === "mesh" ? 'blur(40px)' : 'blur(20px)';
-                for (let i = 0; i < 5 + (density / 10); i++) {
-                    ctx.fillStyle = `hsl(${(palettes[index].strokeHue + seededRandom() * 100) % 360}, 100%, 60%)`;
-                    ctx.beginPath();
-                    ctx.arc(seededRandom() * width, seededRandom() * height, 50 + seededRandom() * amplitude, 0, Math.PI * 2);
+                    ctx.fillStyle = `hsla(${(palettes[index].strokeHue + i * 20)%360}, 80%, 60%, 0.5)`;
                     ctx.fill();
                 }
-                ctx.filter = 'none';
             } 
-            
-            else if (designMode === "wave") {
-                ctx.strokeStyle = `hsl(${palettes[index].strokeHue}, 100%, 80%)`;
-                const spacing = Math.max(10, 60 - density);
-                for (let y = spacing; y < height; y += spacing) {
-                    ctx.beginPath();
-                    for (let x = 0; x <= width; x += 10) {
-                        // uniqueOffset makes the waves wave differently per canvas
-                        const dy = Math.sin((x * (frequency / 200)) + (y / 50) + uniqueOffset) * (amplitude / 4);
-                        if (x === 0) ctx.moveTo(x, y + dy); else ctx.lineTo(x, y + dy);
-                    }
-                    ctx.stroke();
-                }
-            } 
-            
             else if (designMode === "papercut") {
                 ctx.shadowColor = 'rgba(0,0,0,0.6)';
                 ctx.shadowBlur = 20;
@@ -172,127 +290,20 @@ document.addEventListener("DOMContentLoaded", () => {
                     ctx.fill();
                 }
                 ctx.shadowBlur = 0;
-            } 
-            
-            else if (designMode === "bauhaus" || designMode === "geometric") {
-                const bauhausColors = ['#E03C31', '#005096', '#FBB034', '#111111', '#EEEEEE'];
-                for (let i = 0; i < density; i++) {
-                    if (designMode === "bauhaus") {
-                        ctx.fillStyle = bauhausColors[Math.floor(seededRandom() * bauhausColors.length)];
-                    } else {
-                        ctx.fillStyle = `hsla(${(palettes[index].strokeHue + seededRandom()*60)%360}, 80%, 60%, 0.7)`;
-                    }
-                    const shapeType = Math.floor(seededRandom() * 3);
-                    const size = 10 + seededRandom() * amplitude;
-                    const bx = seededRandom() * width;
-                    const by = seededRandom() * height;
-                    
-                    ctx.beginPath();
-                    if (shapeType === 0) { ctx.arc(bx, by, size, 0, Math.PI * 2); } 
-                    else if (shapeType === 1) { ctx.rect(bx, by, size * 1.5, size * 1.5); } 
-                    else { ctx.moveTo(bx, by - size); ctx.lineTo(bx + size, by + size); ctx.lineTo(bx - size, by + size); }
-                    ctx.fill();
-                }
-            } 
-            
-            else if (designMode === "dot" || designMode === "polka" || designMode === "halftone") {
-                const spacing = designMode === "polka" ? Math.max(20, 80 - density) : Math.max(10, 50 - density);
-                ctx.fillStyle = `hsl(${palettes[index].strokeHue}, 100%, 80%)`;
-                
-                for (let y = spacing/2; y < height; y += spacing) {
-                    for (let x = spacing/2; x < width; x += spacing) {
-                        let r = thickness / 4;
-                        if (designMode === "polka") r = (amplitude / 10);
-                        if (designMode === "halftone") {
-                            // uniqueOffset shifts the halftone focal point
-                            const focalX = centerX + Math.sin(uniqueOffset) * 50;
-                            const focalY = centerY + Math.cos(uniqueOffset) * 50;
-                            const dist = Math.sqrt(Math.pow(x - focalX, 2) + Math.pow(y - focalY, 2));
-                            r = Math.max(1, (amplitude / 10) - (dist / (chaos || 1)));
-                        }
-                        // Add slight organic random variation per dot
-                        r = Math.max(0, r + (seededRandom() - 0.5) * (chaos / 10));
-                        
-                        if(r > 0) {
-                            ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); ctx.fill();
-                        }
-                    }
-                }
-            } 
-            
-            else if (designMode === "hexagon") {
-                const hexSize = Math.max(10, (amplitude / 5));
-                ctx.strokeStyle = `hsl(${palettes[index].strokeHue}, 100%, 70%)`;
-                for (let y = 0; y < height + hexSize; y += hexSize * 1.5) {
-                    for (let x = 0; x < width + hexSize; x += hexSize * Math.sqrt(3)) {
-                        const offset = (Math.round(y / (hexSize * 1.5)) % 2 === 0) ? 0 : (hexSize * Math.sqrt(3)) / 2;
-                        // Add seeded random jitter so the grid shifts slightly per canvas
-                        const jitterX = (seededRandom() - 0.5) * (chaos / 5);
-                        const jitterY = (seededRandom() - 0.5) * (chaos / 5);
-                        drawHexagon(ctx, x + offset + jitterX, y + jitterY, hexSize - (density / 10));
-                        ctx.stroke();
-                    }
-                }
-            } 
-            
-            else if (designMode === "spiral") {
-                ctx.strokeStyle = `hsl(${palettes[index].strokeHue}, 100%, 75%)`;
-                ctx.beginPath();
-                for (let i = 0; i < density * 15; i++) {
-                    const angle = 0.2 * i;
-                    const r = (amplitude / 20) * angle;
-                    // uniqueOffset changes the spiral's rotation per canvas
-                    const x = centerX + r * Math.cos(angle + (chaos / 10) + uniqueOffset);
-                    const y = centerY + r * Math.sin(angle + (chaos / 10) + uniqueOffset);
-                    if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
-                }
-                ctx.stroke();
             }
-            
-            // Default Fallback (The original Mixed Geometric)
             else {
+                // Mixed fallback
                 for (let i = 1; i <= density; i++) {
                     ctx.beginPath();
                     const hue = (palettes[index].strokeHue + (i * 3)) % 360;
                     ctx.strokeStyle = `hsl(${hue}, 100%, 85%)`;
                     const radius = 10 + (i * (amplitude / 5));
                     
-                    if (index === 0) { 
-                        for (let angle = 0; angle <= Math.PI * 2 + 0.1; angle += 0.1) {
-                            const distortion = Math.sin(angle * (chaos / 10)) * (chaos / 3);
-                            const x = centerX + Math.cos(angle) * (radius + distortion);
-                            const y = centerY + Math.sin(angle) * (radius + distortion);
-                            if (angle === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
-                        }
-                    } else if (index === 1) { 
-                        const sides = 3 + Math.floor(chaos / 15); 
-                        for (let angle = 0; angle <= Math.PI * 2 + 0.1; angle += (Math.PI * 2 / sides)) {
-                            const rotAngle = angle + (i * 0.15); 
-                            const x = centerX + Math.cos(rotAngle) * radius;
-                            const y = centerY + Math.sin(rotAngle) * radius;
-                            if (angle === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
-                        }
-                    } else if (index === 2) { 
-                        for (let angle = 0; angle <= Math.PI * 2 + 0.1; angle += 0.1) {
-                            const cx = centerX + Math.cos(i * 0.5) * (amplitude / 4);
-                            const cy = centerY + Math.sin(i * 0.5) * (amplitude / 4);
-                            const distortion = Math.cos(angle * 6) * (chaos / 5);
-                            const x = cx + Math.cos(angle) * (radius + distortion);
-                            const y = cy + Math.sin(angle) * (radius + distortion);
-                            if (angle === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
-                        }
-                    } else { 
-                        const spikes = 8 + Math.floor(chaos / 10);
-                        for (let angle = 0; angle <= Math.PI * 2 + 0.1; angle += (Math.PI * 2 / spikes)) {
-                            const outerX = centerX + Math.cos(angle) * (radius + (amplitude / 2));
-                            const outerY = centerY + Math.sin(angle) * (radius + (amplitude / 2));
-                            if (angle === 0) ctx.moveTo(outerX, outerY); else ctx.lineTo(outerX, outerY);
-                            
-                            const innerAngle = angle + (Math.PI / spikes);
-                            const innerX = centerX + Math.cos(innerAngle) * (radius * 0.4);
-                            const innerY = centerY + Math.sin(innerAngle) * (radius * 0.4);
-                            ctx.lineTo(innerX, innerY);
-                        }
+                    for (let angle = 0; angle <= Math.PI * 2 + 0.1; angle += 0.1) {
+                        const distortion = Math.sin(angle * (chaos / 10)) * (chaos / 3);
+                        const x = centerX + Math.cos(angle) * (radius + distortion);
+                        const y = centerY + Math.sin(angle) * (radius + distortion);
+                        if (angle === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
                     }
                     ctx.closePath();
                     ctx.stroke();
@@ -303,6 +314,5 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    // Run once on initial load
     generateDesigns();
 });
