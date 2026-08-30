@@ -7,6 +7,7 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
+    <!-- Top Navigation -->
     <header class="topbar">
         <div class="logo-section">
             <span class="diamond-icon">&#9670;</span>
@@ -25,8 +26,23 @@
         </div>
     </header>
 
+    <!-- Main Workspace -->
     <div class="workspace">
+        <!-- Left Sidebar / Controls -->
         <aside class="sidebar">
+            
+            <!-- NEW: Number of Posters Selection -->
+            <div class="control-group">
+                <label>NUMBER OF POSTERS</label>
+                <select id="poster-count">
+                    <option value="4" selected>4 Posters</option>
+                    <option value="3">3 Posters</option>
+                    <option value="2">2 Posters</option>
+                    <option value="1">1 Poster</option>
+                </select>
+            </div>
+
+            <!-- Individual Adjustments -->
             <div class="control-group">
                 <div class="slider-container">
                     <label>INDIVIDUAL VERTICAL <span id="val-vertical">55%</span></label>
@@ -38,11 +54,13 @@
                 </div>
             </div>
 
-            <div class="accordion">POSTER 1 <span class="arrow">&#9662;</span></div>
-            <div class="accordion">POSTER 2 <span class="arrow">&#9662;</span></div>
-            <div class="accordion">POSTER 3 <span class="arrow">&#9662;</span></div>
-            <div class="accordion">POSTER 4 <span class="arrow">&#9662;</span></div>
+            <!-- Accordions -->
+            <div class="accordion" id="acc-1">POSTER 1 <span class="arrow">&#9662;</span></div>
+            <div class="accordion" id="acc-2">POSTER 2 <span class="arrow">&#9662;</span></div>
+            <div class="accordion" id="acc-3">POSTER 3 <span class="arrow">&#9662;</span></div>
+            <div class="accordion" id="acc-4">POSTER 4 <span class="arrow">&#9662;</span></div>
 
+            <!-- Settings -->
             <div class="settings-header">
                 <h3>&#9881; SETTINGS</h3>
             </div>
@@ -50,12 +68,15 @@
             <div class="control-group">
                 <label>DESIGN MODE</label>
                 <select id="design-mode">
+                    <!-- NEW: Updated Options -->
+                    <option value="mixed">Mixed Geometric</option>
+                    <option value="watercolor">Watercolor Bubble</option>
                     <option value="mandala">Mandala Art</option>
-                    <option value="abstract">Abstract Wave</option>
                     <option value="minimal">Minimalist</option>
                 </select>
             </div>
 
+            <!-- Engine Settings Sliders -->
             <div class="control-group">
                 <div class="slider-container">
                     <label>BASE DENSITY <span id="val-density">19</span></label>
@@ -86,20 +107,14 @@
             <button class="download-btn">DOWNLOAD SVG</button>
         </aside>
 
+        <!-- Right Canvas Area -->
         <main class="canvas-area">
             <div class="canvas-board">
-                <div class="poster" id="poster-1">
-                    <canvas width="300" height="450"></canvas>
-                </div>
-                <div class="poster" id="poster-2">
-                    <canvas width="300" height="450"></canvas>
-                </div>
-                <div class="poster" id="poster-3">
-                    <canvas width="300" height="450"></canvas>
-                </div>
-                <div class="poster" id="poster-4">
-                    <canvas width="300" height="450"></canvas>
-                </div>
+                <!-- Posters -->
+                <div class="poster" id="poster-1"><canvas width="300" height="450"></canvas></div>
+                <div class="poster" id="poster-2"><canvas width="300" height="450"></canvas></div>
+                <div class="poster" id="poster-3"><canvas width="300" height="450"></canvas></div>
+                <div class="poster" id="poster-4"><canvas width="300" height="450"></canvas></div>
             </div>
         </main>
     </div>
