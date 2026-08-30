@@ -3,79 +3,106 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My Poster Studio</title>
+    <title>Ali Studio - Master Poster Generator</title>
     <link rel="stylesheet" href="style.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
-    <nav class="navbar">
-        <div class="logo">Pixel<span>Studio</span></div>
-        <ul class="nav-links">
-            <li><a href="#home">Home</a></li>
-            <li><a href="#portfolio">Gallery</a></li>
-            <li><a href="#contact">Contact</a></li>
-        </ul>
-        <div class="burger">
-            <div class="line1"></div>
-            <div class="line2"></div>
-            <div class="line3"></div>
+    <header class="topbar">
+        <div class="logo-section">
+            <span class="diamond-icon">&#9670;</span>
+            <h1>ALI STUDIO</h1>
+            <span class="subtitle">Master Poster Generator</span>
         </div>
-    </nav>
+        
+        <div class="alert-section">
+            <div class="alert-title"><span class="warning-icon">&#9888;</span> ADOBE STOCK / MICROSTOCK ALERT</div>
+            <div class="alert-sub">To avoid Similar issues, customise designs before uploading / Similar issue এড়াতে ডিজাইন কাস্টমাইজ করে নিন</div>
+        </div>
 
-    <header id="home" class="hero">
-        <div class="hero-content">
-            <h1>Premium Digital Posters</h1>
-            <p>Showcasing high-quality vectors, corporate scenes, and conceptual connectioneering for modern creative projects.</p>
-            <a href="#portfolio" class="btn">Explore the Gallery</a>
+        <div class="user-section">
+            <div class="avatar"><span class="avatar-letter">M</span> Mohammad</div>
+            <button class="upgrade-btn">&#10024; UPGRADE TO PRO</button>
         </div>
     </header>
 
-    <section id="portfolio" class="portfolio">
-        <h2>Latest Works</h2>
-        <div class="grid-container">
-            <div class="grid-item">
-                <img src="https://images.unsplash.com/photo-1558655146-d09347e92766?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80" alt="Corporate Concept">
-                <div class="overlay">
-                    <h3>Corporate Scenes</h3>
-                    <p>Modern business vector layouts</p>
+    <div class="workspace">
+        <aside class="sidebar">
+            <div class="control-group">
+                <div class="slider-container">
+                    <label>INDIVIDUAL VERTICAL <span id="val-vertical">55%</span></label>
+                    <input type="range" id="vertical" min="0" max="100" value="55" data-suffix="%">
+                </div>
+                <div class="slider-container">
+                    <label>INDIVIDUAL HORIZONTAL <span id="val-horizontal">5%</span></label>
+                    <input type="range" id="horizontal" min="0" max="100" value="5" data-suffix="%">
                 </div>
             </div>
-            <div class="grid-item">
-                <img src="https://images.unsplash.com/photo-1606787366850-de6330128bfc?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80" alt="Culinary Art">
-                <div class="overlay">
-                    <h3>Culinary Arts</h3>
-                    <p>Vibrant food & beverage concepts</p>
-                </div>
-            </div>
-            <div class="grid-item">
-                <img src="https://images.unsplash.com/photo-1561070791-2526d30994b5?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80" alt="Connectioneering">
-                <div class="overlay">
-                    <h3>Connectioneering</h3>
-                    <p>Abstract networking and connectivity</p>
-                </div>
-            </div>
-            <div class="grid-item">
-                <img src="https://images.unsplash.com/photo-1550745165-9bc0b252726f?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80" alt="Microstock Asset">
-                <div class="overlay">
-                    <h3>Premium Microstock</h3>
-                    <p>High-resolution commercial assets</p>
-                </div>
-            </div>
-        </div>
-    </section>
 
-    <footer id="contact">
-        <div class="footer-content">
-            <h3>Ready to collaborate?</h3>
-            <p>Connect with me to license custom vector graphics and digital concepts.</p>
-            <div class="socials">
-                <a href="#"><i class="fa-brands fa-github"></i></a>
-                <a href="#"><i class="fa-solid fa-envelope"></i></a>
-                <a href="#"><i class="fa-brands fa-behance"></i></a>
+            <div class="accordion">POSTER 1 <span class="arrow">&#9662;</span></div>
+            <div class="accordion">POSTER 2 <span class="arrow">&#9662;</span></div>
+            <div class="accordion">POSTER 3 <span class="arrow">&#9662;</span></div>
+            <div class="accordion">POSTER 4 <span class="arrow">&#9662;</span></div>
+
+            <div class="settings-header">
+                <h3>&#9881; SETTINGS</h3>
             </div>
-            <p class="copyright">&copy; 2026 Pixel Studio. All rights reserved.</p>
-        </div>
-    </footer>
+
+            <div class="control-group">
+                <label>DESIGN MODE</label>
+                <select id="design-mode">
+                    <option value="mandala">Mandala Art</option>
+                    <option value="abstract">Abstract Wave</option>
+                    <option value="minimal">Minimalist</option>
+                </select>
+            </div>
+
+            <div class="control-group">
+                <div class="slider-container">
+                    <label>BASE DENSITY <span id="val-density">19</span></label>
+                    <input type="range" id="density" min="1" max="50" value="19" data-suffix="">
+                </div>
+                <div class="slider-container">
+                    <label>WAVE FREQUENCY <span id="val-frequency">18%</span></label>
+                    <input type="range" id="frequency" min="0" max="100" value="18" data-suffix="%">
+                </div>
+                <div class="slider-container">
+                    <label>BASE THICKNESS <span id="val-thickness">18PX</span></label>
+                    <input type="range" id="thickness" min="1" max="100" value="18" data-suffix="PX">
+                </div>
+                <div class="slider-container">
+                    <label>AMPLITUDE <span id="val-amplitude">179%</span></label>
+                    <input type="range" id="amplitude" min="0" max="300" value="179" data-suffix="%">
+                </div>
+                <div class="slider-container">
+                    <label>PHASE SHIFT <span id="val-phase">33&deg;</span></label>
+                    <input type="range" id="phase" min="0" max="360" value="33" data-suffix="&deg;">
+                </div>
+                <div class="slider-container">
+                    <label>CHAOS <span id="val-chaos">73%</span></label>
+                    <input type="range" id="chaos" min="0" max="100" value="73" data-suffix="%">
+                </div>
+            </div>
+
+            <button class="download-btn">DOWNLOAD SVG</button>
+        </aside>
+
+        <main class="canvas-area">
+            <div class="canvas-board">
+                <div class="poster" id="poster-1">
+                    <canvas width="300" height="450"></canvas>
+                </div>
+                <div class="poster" id="poster-2">
+                    <canvas width="300" height="450"></canvas>
+                </div>
+                <div class="poster" id="poster-3">
+                    <canvas width="300" height="450"></canvas>
+                </div>
+                <div class="poster" id="poster-4">
+                    <canvas width="300" height="450"></canvas>
+                </div>
+            </div>
+        </main>
+    </div>
 
     <script src="script.js"></script>
 </body>
