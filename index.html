@@ -7,31 +7,24 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <!-- Top Navigation -->
     <header class="topbar">
         <div class="logo-section">
             <span class="diamond-icon">&#9670;</span>
             <h1>ALI STUDIO</h1>
             <span class="subtitle">Master Poster Generator</span>
         </div>
-        
         <div class="alert-section">
             <div class="alert-title"><span class="warning-icon">&#9888;</span> ADOBE STOCK / MICROSTOCK ALERT</div>
             <div class="alert-sub">To avoid Similar issues, customise designs before uploading / Similar issue এড়াতে ডিজাইন কাস্টমাইজ করে নিন</div>
         </div>
-
         <div class="user-section">
             <div class="avatar"><span class="avatar-letter">M</span> Mohammad</div>
             <button class="upgrade-btn">&#10024; UPGRADE TO PRO</button>
         </div>
     </header>
 
-    <!-- Main Workspace -->
     <div class="workspace">
-        <!-- Left Sidebar / Controls -->
         <aside class="sidebar">
-            
-            <!-- NEW: Number of Posters Selection -->
             <div class="control-group">
                 <label>NUMBER OF POSTERS</label>
                 <select id="poster-count">
@@ -42,7 +35,6 @@
                 </select>
             </div>
 
-            <!-- Individual Adjustments -->
             <div class="control-group">
                 <div class="slider-container">
                     <label>INDIVIDUAL VERTICAL <span id="val-vertical">55%</span></label>
@@ -54,13 +46,11 @@
                 </div>
             </div>
 
-            <!-- Accordions -->
             <div class="accordion" id="acc-1">POSTER 1 <span class="arrow">&#9662;</span></div>
             <div class="accordion" id="acc-2">POSTER 2 <span class="arrow">&#9662;</span></div>
             <div class="accordion" id="acc-3">POSTER 3 <span class="arrow">&#9662;</span></div>
             <div class="accordion" id="acc-4">POSTER 4 <span class="arrow">&#9662;</span></div>
 
-            <!-- Settings -->
             <div class="settings-header">
                 <h3>&#9881; SETTINGS</h3>
             </div>
@@ -68,15 +58,24 @@
             <div class="control-group">
                 <label>DESIGN MODE</label>
                 <select id="design-mode">
-                    <!-- NEW: Updated Options -->
                     <option value="mixed">Mixed Geometric</option>
                     <option value="watercolor">Watercolor Bubble</option>
-                    <option value="mandala">Mandala Art</option>
-                    <option value="minimal">Minimalist</option>
+                    <option value="fluid">Fluid Shapes</option>
+                    <option value="blob">Blob Design</option>
+                    <option value="liquid">Liquid Gradient</option>
+                    <option value="mesh">Mesh Gradient</option>
+                    <option value="wave">Wave Pattern</option>
+                    <option value="geometric">Geometric Pattern</option>
+                    <option value="papercut">Paper Cut Style</option>
+                    <option value="bauhaus">Bauhaus Style</option>
+                    <option value="dot">Dot Pattern</option>
+                    <option value="polka">Polka Dot</option>
+                    <option value="halftone">Halftone Pattern</option>
+                    <option value="hexagon">Hexagon Pattern</option>
+                    <option value="spiral">Spiral Pattern</option>
                 </select>
             </div>
 
-            <!-- Engine Settings Sliders -->
             <div class="control-group">
                 <div class="slider-container">
                     <label>BASE DENSITY <span id="val-density">19</span></label>
@@ -103,14 +102,11 @@
                     <input type="range" id="chaos" min="0" max="100" value="73" data-suffix="%">
                 </div>
             </div>
-
             <button class="download-btn">DOWNLOAD SVG</button>
         </aside>
 
-        <!-- Right Canvas Area -->
         <main class="canvas-area">
             <div class="canvas-board">
-                <!-- Posters -->
                 <div class="poster" id="poster-1"><canvas width="300" height="450"></canvas></div>
                 <div class="poster" id="poster-2"><canvas width="300" height="450"></canvas></div>
                 <div class="poster" id="poster-3"><canvas width="300" height="450"></canvas></div>
@@ -118,7 +114,6 @@
             </div>
         </main>
     </div>
-
     <script src="script.js"></script>
 </body>
 </html>
