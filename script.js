@@ -1,9 +1,8 @@
 document.addEventListener("DOMContentLoaded", () => {
     
-    // Custom Seeded Random Number Generator
-    // This ensures layouts change on load/mode-switch, but stay stable when sliding!
+    // Generates a brand new master seed every time the website is opened!
     let masterSeed = Math.random() * 10000;
-    let currentSeed = masterSeed;
+    let currentSeed;
     
     function seededRandom() {
         let x = Math.sin(currentSeed++) * 10000;
@@ -20,7 +19,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 document.getElementById(`val-${targetId}`).innerHTML = `${e.target.value}${suffix}`;
             }
             
-            // If the user changes the Design Mode, generate a completely new random layout seed!
+            // Generate a completely new layout if the user changes the Design Mode
             if (e.target.id === "design-mode") {
                 masterSeed = Math.random() * 10000;
             }
@@ -29,7 +28,6 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     });
 
-    // Helper: Draws an organic wavy blob path
     function createBlobPath(ctx, cx, cy, r, c) {
         ctx.beginPath();
         const points = 12;
@@ -44,7 +42,6 @@ document.addEventListener("DOMContentLoaded", () => {
         ctx.closePath();
     }
 
-    // Helper: Draws a perfect hexagon
     function drawHexagon(ctx, x, y, r) {
         ctx.beginPath();
         for (let i = 0; i < 6; i++) {
@@ -66,11 +63,9 @@ document.addEventListener("DOMContentLoaded", () => {
         const chaos = parseInt(document.getElementById("chaos").value);
         const thickness = parseInt(document.getElementById("thickness").value);
 
-        // Manage visibility
+        // Hide unused posters
         document.querySelectorAll(".poster").forEach((el, i) => el.style.display = i < posterCount ? "block" : "none");
-        document.querySelectorAll(".accordion").forEach((el, i) => el.style.display = i < posterCount ? "flex" : "none");
 
-        // Vibrant background gradients
         const palettes = [
             { bg1: "#2b0055", bg2: "#8e1957", strokeHue: 45 },
             { bg1: "#000c24", bg2: "#004882", strokeHue: 190 },
@@ -78,11 +73,12 @@ document.addEventListener("DOMContentLoaded", () => {
             { bg1: "#4a0000", bg2: "#a83200", strokeHue: 60 }
         ];
 
-        // Reset the seed at the start of drawing so sliders don't cause chaotic flickering
-        currentSeed = masterSeed;
-
         document.querySelectorAll(".poster canvas").forEach((canvas, index) => {
             if (index >= posterCount) return;
+
+            // THE FIX: Give each canvas its own unique mathematical starting point
+            // This guarantees Canvas 1, 2, 3, and 4 will always draw entirely different shapes!
+            currentSeed = masterSeed + (index * 9999);
 
             const ctx = canvas.getContext("2d");
             const width = canvas.width;
@@ -90,12 +86,10 @@ document.addEventListener("DOMContentLoaded", () => {
             const centerX = width / 2;
             const centerY = height / 2;
             
-            // Clean slate for every draw
             ctx.restore();
             ctx.save();
             ctx.clearRect(0, 0, width, height);
 
-            // Draw Gradient Background
             const gradient = ctx.createLinearGradient(0, 0, 0, height);
             gradient.addColorStop(0, palettes[index].bg1);
             gradient.addColorStop(1, palettes[index].bg2);
@@ -105,8 +99,9 @@ document.addEventListener("DOMContentLoaded", () => {
             ctx.lineWidth = thickness / 5;
             ctx.lineJoin = "round";
 
-            // --- DESIGN MODES ---
-            
+            // Grab a unique offset for grid-based patterns so they don't look identical
+            const uniqueOffset = seededRandom() * 1000;
+
             if (designMode === "watercolor") {
                 for (let i = 0; i < density * 2; i++) {
                     const x = seededRandom() * width;
@@ -149,7 +144,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     ctx.arc(seededRandom() * width, seededRandom() * height, 50 + seededRandom() * amplitude, 0, Math.PI * 2);
                     ctx.fill();
                 }
-                ctx.filter = 'none'; // reset filter
+                ctx.filter = 'none';
             } 
             
             else if (designMode === "wave") {
@@ -158,7 +153,8 @@ document.addEventListener("DOMContentLoaded", () => {
                 for (let y = spacing; y < height; y += spacing) {
                     ctx.beginPath();
                     for (let x = 0; x <= width; x += 10) {
-                        const dy = Math.sin((x * (frequency / 200)) + (y / 50) + currentSeed) * (amplitude / 4);
+                        // uniqueOffset makes the waves wave differently per canvas
+                        const dy = Math.sin((x * (frequency / 200)) + (y / 50) + uniqueOffset) * (amplitude / 4);
                         if (x === 0) ctx.moveTo(x, y + dy); else ctx.lineTo(x, y + dy);
                     }
                     ctx.stroke();
@@ -208,9 +204,15 @@ document.addEventListener("DOMContentLoaded", () => {
                         let r = thickness / 4;
                         if (designMode === "polka") r = (amplitude / 10);
                         if (designMode === "halftone") {
-                            const dist = Math.sqrt(Math.pow(x - centerX, 2) + Math.pow(y - centerY, 2));
+                            // uniqueOffset shifts the halftone focal point
+                            const focalX = centerX + Math.sin(uniqueOffset) * 50;
+                            const focalY = centerY + Math.cos(uniqueOffset) * 50;
+                            const dist = Math.sqrt(Math.pow(x - focalX, 2) + Math.pow(y - focalY, 2));
                             r = Math.max(1, (amplitude / 10) - (dist / (chaos || 1)));
                         }
+                        // Add slight organic random variation per dot
+                        r = Math.max(0, r + (seededRandom() - 0.5) * (chaos / 10));
+                        
                         if(r > 0) {
                             ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); ctx.fill();
                         }
@@ -224,7 +226,10 @@ document.addEventListener("DOMContentLoaded", () => {
                 for (let y = 0; y < height + hexSize; y += hexSize * 1.5) {
                     for (let x = 0; x < width + hexSize; x += hexSize * Math.sqrt(3)) {
                         const offset = (Math.round(y / (hexSize * 1.5)) % 2 === 0) ? 0 : (hexSize * Math.sqrt(3)) / 2;
-                        drawHexagon(ctx, x + offset, y, hexSize - (density / 10));
+                        // Add seeded random jitter so the grid shifts slightly per canvas
+                        const jitterX = (seededRandom() - 0.5) * (chaos / 5);
+                        const jitterY = (seededRandom() - 0.5) * (chaos / 5);
+                        drawHexagon(ctx, x + offset + jitterX, y + jitterY, hexSize - (density / 10));
                         ctx.stroke();
                     }
                 }
@@ -236,8 +241,9 @@ document.addEventListener("DOMContentLoaded", () => {
                 for (let i = 0; i < density * 15; i++) {
                     const angle = 0.2 * i;
                     const r = (amplitude / 20) * angle;
-                    const x = centerX + r * Math.cos(angle + (chaos / 10));
-                    const y = centerY + r * Math.sin(angle + (chaos / 10));
+                    // uniqueOffset changes the spiral's rotation per canvas
+                    const x = centerX + r * Math.cos(angle + (chaos / 10) + uniqueOffset);
+                    const y = centerY + r * Math.sin(angle + (chaos / 10) + uniqueOffset);
                     if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
                 }
                 ctx.stroke();
