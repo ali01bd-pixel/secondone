@@ -1,103 +1,1029 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ali Studio - Master Poster Generator</title>
-    <link rel="stylesheet" href="style.css">
-</head>
-<body>
-    <header class="topbar">
-        <div class="logo-section">
-            <span class="diamond-icon">&#9670;</span>
-            <h1>ALI STUDIO</h1>
-            <span class="subtitle">Master Poster Generator</span>
-        </div>
-        <div class="alert-section">
-            <div class="alert-title"><span class="warning-icon">&#9888;</span> ADOBE STOCK / MICROSTOCK ALERT</div>
-            <div class="alert-sub">To avoid Similar issues, customise designs before uploading / Similar issue এড়াতে ডিজাইন কাস্টমাইজ করে নিন</div>
-        </div>
-        <div class="user-section">
-            <div class="avatar"><span class="avatar-letter">M</span> Mohammad</div>
-            <button class="upgrade-btn">&#10024; UPGRADE TO PRO</button>
-        </div>
-    </header>
+Create a professional, modern, high-performance web application called **“Color Poster Design Generator”** using only **HTML5, CSS3, and vanilla JavaScript**.
 
-    <div class="workspace">
-        <aside class="sidebar">
-            <div class="control-group">
-                <label>NUMBER OF POSTERS</label>
-                <select id="poster-count">
-                    <option value="4" selected>4 Posters</option>
-                    <option value="3">3 Posters</option>
-                    <option value="2">2 Posters</option>
-                    <option value="1">1 Poster</option>
-                </select>
-            </div>
+The website must be fully compatible with **GitHub Pages** and must work without any backend, server, database, build tool, Node.js, React, Vue, Angular, or external framework.
 
-            <div class="settings-header">
-                <h3>&#9881; SETTINGS</h3>
-            </div>
+## 1. Main Purpose
 
-            <div class="control-group">
-                <label>DESIGN MODE</label>
-                <select id="design-mode">
-                    <!-- YOUR NEW COMBO AESTHETICS -->
-                    <option value="retro-bubble">Retro + Bubble</option>
-                    <option value="mandala-sacred">Mandala + Sacred Geo</option>
-                    <option value="y2k-chrome">Y2K + Chrome</option>
-                    <option value="floral-mandala">Floral + Mandala</option>
-                    <option value="memphis-geo">Memphis + Geometric</option>
-                    <option value="psychedelic">Psychedelic + Groovy</option>
-                    
-                    <!-- Original Aesthetics -->
-                    <option value="watercolor">Watercolor Bubble</option>
-                    <option value="fluid">Fluid Shapes</option>
-                    <option value="papercut">Paper Cut Style</option>
-                    <option value="mesh">Mesh Gradient</option>
-                    <option value="halftone">Halftone Pattern</option>
-                    <option value="mixed">Mixed Geometric</option>
-                </select>
-            </div>
+Build a powerful browser-based poster/background design generator that allows users to create **10,000+ unique poster-style designs** using carefully selected **solid colors and gradient color combinations**.
 
-            <div class="control-group">
-                <div class="slider-container">
-                    <label>BASE DENSITY <span id="val-density">19</span></label>
-                    <input type="range" id="density" min="1" max="50" value="19" data-suffix="">
-                </div>
-                <div class="slider-container">
-                    <label>WAVE FREQUENCY <span id="val-frequency">18%</span></label>
-                    <input type="range" id="frequency" min="0" max="100" value="18" data-suffix="%">
-                </div>
-                <div class="slider-container">
-                    <label>BASE THICKNESS <span id="val-thickness">18PX</span></label>
-                    <input type="range" id="thickness" min="1" max="100" value="18" data-suffix="PX">
-                </div>
-                <div class="slider-container">
-                    <label>AMPLITUDE <span id="val-amplitude">179%</span></label>
-                    <input type="range" id="amplitude" min="0" max="300" value="179" data-suffix="%">
-                </div>
-                <div class="slider-container">
-                    <label>PHASE SHIFT <span id="val-phase">33&deg;</span></label>
-                    <input type="range" id="phase" min="0" max="360" value="33" data-suffix="&deg;">
-                </div>
-                <div class="slider-container">
-                    <label>CHAOS <span id="val-chaos">73%</span></label>
-                    <input type="range" id="chaos" min="0" max="100" value="73" data-suffix="%">
-                </div>
-            </div>
-            <button class="download-btn">DOWNLOAD SVG</button>
-        </aside>
+The generated designs must look professional, modern, commercially usable, visually balanced, and suitable for:
 
-        <main class="canvas-area">
-            <div class="canvas-board">
-                <div class="poster" id="poster-1"><canvas width="300" height="450"></canvas></div>
-                <div class="poster" id="poster-2"><canvas width="300" height="450"></canvas></div>
-                <div class="poster" id="poster-3"><canvas width="300" height="450"></canvas></div>
-                <div class="poster" id="poster-4"><canvas width="300" height="450"></canvas></div>
-            </div>
-        </main>
-    </div>
-    <script src="script.js"></script>
-</body>
-</html>
+* Posters
+* Flyers
+* Social media backgrounds
+* Presentation backgrounds
+* Advertising creatives
+* Promotional graphics
+* Web banners
+* Abstract backgrounds
+* Vector-style design inspiration
+
+The website should feel like a professional design tool rather than a simple random color generator.
+
+---
+
+## 2. Most Important Design Requirement
+
+Every generated design must follow a **strict professional color-palette system**.
+
+Do NOT generate random color combinations.
+
+Do NOT combine unrelated colors simply because they are technically valid.
+
+Every design must use carefully curated and harmonious color palettes based on recognized professional color theory and internationally accepted design principles.
+
+The system should use color relationships such as:
+
+* Complementary
+* Analogous
+* Monochromatic
+* Triadic
+* Split-complementary
+* Tetradic
+* Warm palettes
+* Cool palettes
+* Neutral palettes
+* Pastel palettes
+* Earth-tone palettes
+* Luxury palettes
+* Corporate palettes
+* Modern editorial palettes
+* Minimal palettes
+* High-contrast palettes
+* Deep/dark palettes
+* Soft/light palettes
+
+The color combinations must always look intentional and professionally designed.
+
+---
+
+## 3. International Color Palette System
+
+Create a large built-in color library containing thousands of carefully selected colors.
+
+The palette database should include professionally curated colors inspired by internationally recognized color systems and design standards, such as:
+
+* Modern web design palettes
+* UI/UX design palettes
+* Material-style color relationships
+* Professional branding palettes
+* Editorial design palettes
+* Accessible contrast principles
+* Traditional color harmony rules
+* Contemporary graphic design color trends
+
+Do not simply generate random RGB values.
+
+Each color should belong to a meaningful color family.
+
+Color families may include:
+
+* Red
+* Orange
+* Yellow
+* Gold
+* Green
+* Emerald
+* Teal
+* Cyan
+* Blue
+* Navy
+* Purple
+* Violet
+* Magenta
+* Pink
+* Brown
+* Beige
+* Cream
+* Gray
+* Charcoal
+* Black
+* White
+
+The generator must intelligently select colors that work together.
+
+---
+
+## 4. Solid Color Designs
+
+Include a dedicated **Solid Color Design Mode**.
+
+This mode should generate poster designs using one or multiple solid colors.
+
+Examples of design structures:
+
+* One-color minimalist composition
+* Two-color split composition
+* Three-color geometric composition
+* Color block composition
+* Vertical color sections
+* Horizontal color sections
+* Diagonal color sections
+* Corner blocks
+* Layered blocks
+* Minimal abstract shapes
+* Geometric poster layouts
+* Modern editorial compositions
+
+The shapes should be created using normal HTML/CSS elements such as:
+
+* div
+* pseudo-elements
+* CSS borders
+* CSS border-radius
+* CSS transforms
+* CSS clip-path where appropriate
+
+Do not use SVG filters or SVG visual effects.
+
+---
+
+## 5. Gradient Design Mode
+
+Include a separate **Gradient Design Mode**.
+
+The gradient generator should support:
+
+* Linear gradients
+* Radial gradients
+* Multiple-stop gradients
+* Two-color gradients
+* Three-color gradients
+* Four-color gradients
+* Diagonal gradients
+* Vertical gradients
+* Horizontal gradients
+* Center-focused gradients
+* Corner-focused gradients
+* Soft gradients
+* Deep gradients
+* Luxury gradients
+* Pastel gradients
+* Neon-inspired but controlled gradients
+
+The gradients must always be based on a harmonious professional palette.
+
+Avoid ugly rainbow-style random gradients unless the user explicitly selects a rainbow option.
+
+Gradient colors should be selected intelligently from compatible palette groups.
+
+---
+
+## 6. Design Categories / Styles
+
+Create many different professional poster composition styles.
+
+The system should include at least the following style categories:
+
+1. Minimalist Poster
+2. Modern Geometric
+3. Editorial
+4. Corporate
+5. Luxury
+6. Abstract
+7. Swiss-Inspired
+8. Contemporary
+9. Futuristic
+10. Retro
+11. Soft Modern
+12. Bold Graphic
+13. Minimal Gradient
+14. Color Blocking
+15. Layered Geometry
+16. Diagonal Composition
+17. Vertical Composition
+18. Horizontal Composition
+19. Center Composition
+20. Corner Composition
+21. Split Composition
+22. Asymmetrical Composition
+23. Symmetrical Composition
+24. Grid Composition
+25. Organic Geometry
+26. Modern Abstract
+27. Premium Background
+28. Fashion Editorial
+29. Technology
+30. Creative Agency Style
+
+Each category should produce a different visual structure.
+
+The designs must not simply change colors.
+
+The actual composition/layout should also change.
+
+---
+
+## 7. 10,000+ Unique Design Requirement
+
+The application must be capable of producing **at least 10,000 unique design combinations**.
+
+Uniqueness should come from a combination of:
+
+* Layout
+* Shape arrangement
+* Shape size
+* Shape position
+* Rotation
+* Scale
+* Number of elements
+* Color palette
+* Color placement
+* Gradient direction
+* Gradient position
+* Border radius
+* Spacing
+* Alignment
+* Composition type
+* Background treatment
+
+Do not simply generate a random number and claim there are 10,000 designs.
+
+The underlying design system must actually have enough variation to generate thousands of meaningful designs.
+
+---
+
+## 8. Professional Color Rules
+
+Implement strict rules to prevent bad color combinations.
+
+For example:
+
+* Do not use more than a controlled number of dominant colors.
+* Use one primary color with one or two supporting colors where appropriate.
+* Use neutral colors when needed to create visual balance.
+* Maintain sufficient contrast.
+* Avoid visually conflicting combinations unless intentionally selected as a design style.
+* Avoid excessive saturation.
+* Avoid random fluorescent combinations.
+* Avoid muddy color combinations.
+* Avoid unnecessary color noise.
+* Avoid using every color family in one design.
+
+Every generated design should look as though a professional graphic designer selected the colors.
+
+---
+
+## 9. Color Palette Browser
+
+Add a dedicated **Color Palette Library** panel.
+
+Users should be able to browse:
+
+* Trending palettes
+* Professional palettes
+* Minimal palettes
+* Luxury palettes
+* Pastel palettes
+* Dark palettes
+* Light palettes
+* Corporate palettes
+* Editorial palettes
+* Gradient palettes
+* Monochrome palettes
+* Warm palettes
+* Cool palettes
+* Earth palettes
+
+Each palette should display:
+
+* Color swatches
+* HEX values
+* RGB values
+* Palette name
+* Palette category
+
+Allow users to select a palette and generate designs using it.
+
+---
+
+## 10. User Controls
+
+Create a professional control panel with options such as:
+
+### Design Mode
+
+* Solid
+* Gradient
+* Mixed
+
+### Style
+
+* Minimal
+* Geometric
+* Editorial
+* Luxury
+* Corporate
+* Abstract
+* Modern
+* Retro
+* Futuristic
+* etc.
+
+### Color Palette
+
+* Random Professional Palette
+* Monochromatic
+* Complementary
+* Analogous
+* Triadic
+* Custom Palette
+* Specific curated palette
+
+### Complexity
+
+* Simple
+* Medium
+* Complex
+
+### Shape Density
+
+* Low
+* Medium
+* High
+
+### Gradient Type
+
+* Linear
+* Radial
+* Multi-stop
+
+### Orientation
+
+* Portrait
+* Landscape
+* Square
+
+### Aspect Ratio
+
+Include common poster formats such as:
+
+* 1:1
+* 4:5
+* 5:7
+* 2:3
+* 3:4
+* 9:16
+* 16:9
+* A4
+* A3
+
+---
+
+## 11. Generate Button
+
+Create a large, visually prominent **“GENERATE DESIGN”** button.
+
+When clicked:
+
+* Generate a completely new design.
+* Change the composition.
+* Change the color palette according to the selected rules.
+* Maintain professional visual harmony.
+* Do not repeat the immediately previous design.
+
+Also create:
+
+**“GENERATE 10 DESIGNS”**
+
+This should generate 10 different designs simultaneously.
+
+Each design should be visually different.
+
+---
+
+## 12. Randomize Button
+
+Include a **“Randomize”** button.
+
+Randomization must not mean completely uncontrolled randomness.
+
+Instead, randomly select from valid professional:
+
+* Layouts
+* Palettes
+* Shape systems
+* Gradient systems
+* Composition styles
+
+while maintaining design quality.
+
+---
+
+## 13. Favorite System
+
+Add a Favorite button for each generated design.
+
+Users should be able to:
+
+* Favorite designs
+* Unfavorite designs
+* View all favorites
+* Clear favorites
+
+Store favorites using **localStorage** so they remain after refreshing the page.
+
+---
+
+## 14. Download System
+
+Each design must have a **Download** button.
+
+Users should be able to download designs as high-resolution images.
+
+Preferred format:
+
+* PNG
+
+Also provide:
+
+* JPEG
+* WebP
+
+The download should preserve the actual generated design.
+
+The exported image should not contain:
+
+* Website UI
+* Buttons
+* Control panels
+* Watermarks
+* Unwanted margins
+
+---
+
+## 15. High-Resolution Export
+
+Allow the user to select export resolution such as:
+
+* 1080 × 1080
+* 1080 × 1350
+* 1080 × 1920
+* 1920 × 1080
+* A4
+* A3
+* Custom resolution
+
+The design should remain sharp and clean.
+
+For rendering/export, use **HTML Canvas and JavaScript** where appropriate.
+
+Do not depend on server-side image rendering.
+
+---
+
+## 16. Download All
+
+Add a **“DOWNLOAD ALL”** feature.
+
+When multiple designs are generated, users should be able to download all selected designs.
+
+The download system may package multiple generated images into a ZIP file using a lightweight browser-compatible JavaScript library only when necessary.
+
+If an external library is required, use a reliable CDN and clearly document it in the code.
+
+However, the core design generator itself must remain completely functional using HTML, CSS, and JavaScript.
+
+---
+
+## 17. No SVG Effects
+
+This is a strict requirement.
+
+**DO NOT use SVG filters or SVG visual effects.**
+
+Do not use:
+
+* SVG blur filters
+* SVG turbulence
+* SVG displacement
+* SVG noise filters
+* SVG lighting
+* SVG shadow effects
+* SVG distortion effects
+* SVG filter-based gradients
+
+The visual appearance must be created using:
+
+* CSS
+* HTML elements
+* CSS gradients
+* CSS transforms
+* CSS borders
+* CSS border-radius
+* CSS clip-path where appropriate
+* Canvas rendering
+
+Simple SVG may be avoided entirely unless absolutely necessary.
+
+The preferred implementation is **HTML/CSS + Canvas**.
+
+---
+
+## 18. No Uncontrolled Visual Effects
+
+Do not add unnecessary:
+
+* Glow effects
+* Excessive shadows
+* Random blur
+* Fake textures
+* Noise overlays
+* Excessive transparency
+* Distortion
+* Photographic effects
+
+The design should remain clean and professional.
+
+The focus is primarily on:
+
+**Color + Geometry + Composition + Balance**
+
+---
+
+## 19. Design Preview Area
+
+Create a large central preview area.
+
+The preview should show the generated poster at a high quality.
+
+Provide controls:
+
+* Zoom In
+* Zoom Out
+* Reset Zoom
+* Fullscreen Preview
+* Download
+* Favorite
+* Regenerate
+
+The design should adapt to different screen sizes.
+
+---
+
+## 20. Gallery
+
+Create a gallery section showing previously generated designs.
+
+Each generated design should appear as a thumbnail.
+
+Users should be able to:
+
+* Click a thumbnail
+* Open the full preview
+* Download it
+* Favorite it
+* Regenerate a similar version
+
+Store the recent design history using localStorage.
+
+---
+
+## 21. Similar Design Generator
+
+For every generated design, provide:
+
+**“GENERATE SIMILAR”**
+
+This should generate another design using:
+
+* Similar color family
+* Similar palette harmony
+* Similar overall style
+
+but with:
+
+* Different composition
+* Different geometry
+* Different positioning
+* Different proportions
+
+Therefore, the new design should feel related but not identical.
+
+---
+
+## 22. Custom Color Input
+
+Allow users to enter their own HEX colors.
+
+For example:
+
+#1E3A8A
+#F59E0B
+#F8FAFC
+
+After entering custom colors, the system should generate professional compositions using those colors.
+
+The system should intelligently balance the colors rather than simply placing them randomly.
+
+---
+
+## 23. Accessibility
+
+The interface should follow modern accessibility principles.
+
+Include:
+
+* Proper contrast
+* Keyboard navigation
+* Clear buttons
+* Readable text
+* Visible focus states
+* Semantic HTML
+* Accessible labels
+
+The generated artwork itself should also avoid unreadable color relationships where possible.
+
+---
+
+## 24. Responsive Design
+
+The website must work perfectly on:
+
+* Desktop
+* Laptop
+* Tablet
+* Mobile
+
+Use responsive CSS.
+
+The control panel may become a collapsible drawer on smaller screens.
+
+The preview should automatically resize.
+
+---
+
+## 25. User Interface Design
+
+Create a premium professional UI.
+
+The interface should feel similar to a modern:
+
+* Graphic design application
+* Creative tool
+* Color laboratory
+* Poster generator
+* Professional design platform
+
+Use a clean layout with:
+
+* Top navigation
+* Left control panel
+* Main preview area
+* Right information/favorites panel where appropriate
+* Bottom gallery/history section
+
+Do not make the interface overly colorful.
+
+The UI itself should remain clean and neutral so the generated artwork gets the visual focus.
+
+---
+
+## 26. Website Sections
+
+Include:
+
+### Header
+
+Logo:
+**COLOR POSTER LAB**
+
+Navigation:
+
+* Generator
+* Palettes
+* Gallery
+* Favorites
+* About
+
+### Generator
+
+Main design creation interface.
+
+### Palette Library
+
+Professional color palette browser.
+
+### Gallery
+
+Generated designs.
+
+### Favorites
+
+Saved designs.
+
+### About
+
+Explain that the tool generates professional poster-style compositions using curated color relationships.
+
+---
+
+## 27. Design Quality Rule
+
+This is one of the most important requirements.
+
+Every generated design must satisfy:
+
+**Professional + Balanced + Clean + Modern + Visually Harmonious**
+
+Avoid:
+
+* Random ugly combinations
+* Overcrowded compositions
+* Excessive colors
+* Poor contrast
+* Amateur-looking patterns
+* Repetitive layouts
+* Visually broken geometry
+* Unnecessary effects
+
+Every output should look suitable for professional design work.
+
+---
+
+## 28. Performance
+
+The application must be fast.
+
+Avoid:
+
+* Heavy frameworks
+* Huge assets
+* Excessive DOM elements
+* Unnecessary animations
+* Memory leaks
+
+Use efficient JavaScript.
+
+Do not regenerate the entire application interface unnecessarily when only the artwork needs to change.
+
+---
+
+## 29. Code Structure
+
+Create the project using:
+
+index.html
+style.css
+script.js
+
+Optional:
+
+assets/
+
+The code should be clean, commented, modular, and easy to modify.
+
+Separate:
+
+* Color palette data
+* Design templates
+* Generation logic
+* Canvas export logic
+* UI logic
+* LocalStorage logic
+
+as much as practical.
+
+---
+
+## 30. GitHub Pages Compatibility
+
+The final project must run directly on GitHub Pages.
+
+There must be no backend requirement.
+
+The website should work by simply uploading:
+
+index.html
+style.css
+script.js
+
+to a GitHub repository and enabling GitHub Pages.
+
+Avoid server-side functionality.
+
+Avoid requiring environment variables.
+
+Avoid requiring API keys.
+
+---
+
+## 31. Offline Functionality
+
+The main generator should work without an internet connection after the files are loaded.
+
+All essential:
+
+* Color palettes
+* Design templates
+* Generation logic
+* UI
+
+must be stored locally in the JavaScript files.
+
+External libraries should be avoided unless absolutely necessary.
+
+---
+
+## 32. Design Template Architecture
+
+Create a template-based generation system.
+
+For example:
+
+designTemplate01()
+designTemplate02()
+designTemplate03()
+...
+designTemplate50()
+
+Each template should have a genuinely different composition.
+
+Then combine those templates with:
+
+* Different palette groups
+* Different color assignments
+* Different geometry
+* Different scales
+* Different rotations
+* Different positions
+* Different dimensions
+
+This architecture should make it realistically possible to generate **10,000+ professional variations**.
+
+---
+
+## 33. Anti-Repetition System
+
+Implement a system that remembers recently generated design combinations.
+
+Do not immediately repeat:
+
+* The same layout
+* Same palette
+* Same shape arrangement
+* Same positioning
+* Same gradient direction
+
+For example, maintain a history of recent generation fingerprints in JavaScript/localStorage and avoid generating the same fingerprint again.
+
+---
+
+## 34. Seed-Based Generation
+
+Implement deterministic random generation using a seed.
+
+Each design should have a unique seed.
+
+Display something like:
+
+**Design ID: CP-849273**
+
+Allow users to:
+
+* Copy the design seed
+* Recreate the same design later
+* Generate variations based on the same seed
+
+This is important for reproducibility.
+
+---
+
+## 35. Professional Naming
+
+Automatically generate a professional name for each design.
+
+Examples:
+
+* Midnight Geometry
+* Azure Editorial
+* Crimson Structure
+* Emerald Balance
+* Golden Horizon
+* Indigo Blocks
+* Oceanic Form
+* Modern Terra
+* Soft Lavender Grid
+
+Names should reflect the design's palette and composition.
+
+---
+
+## 36. Metadata
+
+Each design should have internal metadata such as:
+
+* Design ID
+* Design Name
+* Style
+* Palette
+* Colors
+* Generation Seed
+* Layout Type
+* Gradient Type
+* Aspect Ratio
+
+Display the metadata in the information panel.
+
+---
+
+## 37. UI Theme
+
+Use a sophisticated interface.
+
+Suggested visual direction:
+
+* Minimal
+* Premium
+* Modern
+* Professional
+* Neutral UI
+* Strong typography
+* Spacious layout
+* Subtle borders
+* Subtle shadows
+* Smooth but restrained transitions
+
+Do not let the UI compete with the poster designs.
+
+---
+
+## 38. Important Technical Restrictions
+
+DO NOT use:
+
+* React
+* Vue
+* Angular
+* Next.js
+* Node.js
+* PHP
+* Python backend
+* Database
+* Server-side rendering
+* SVG filters
+* SVG visual effects
+* Random uncontrolled color generation
+
+Use:
+
+* HTML5
+* CSS3
+* Vanilla JavaScript
+* Canvas API
+* LocalStorage
+
+---
+
+## 39. Final User Experience
+
+The final experience should be:
+
+1. User opens the website.
+2. User selects Solid or Gradient.
+3. User selects a professional style or Random Professional.
+4. User chooses an aspect ratio.
+5. User clicks Generate.
+6. A high-quality poster design appears.
+7. User can generate another completely different design.
+8. User can create 10 designs at once.
+9. User can favorite designs.
+10. User can view design history.
+11. User can generate similar designs.
+12. User can download individual designs.
+13. User can download all designs.
+14. User can enter custom colors.
+15. User can browse professional palettes.
+16. User can reproduce a design using its seed.
+
+---
+
+## 40. Final Deliverable
+
+Provide the complete working project with:
+
+* index.html
+* style.css
+* script.js
+
+The code must be complete and executable.
+
+Do not provide pseudo-code.
+
+Do not leave important functions unfinished.
+
+Do not use placeholder sections such as “add your own code here”.
+
+All major buttons must actually work.
+
+The generator must immediately produce real designs.
+
+The final result must be visually polished and ready to upload to GitHub Pages.
+
+Most importantly:
+
+**Generate thousands of genuinely different professional poster compositions while maintaining strict color harmony and avoiding random, uncontrolled color combinations.**
+
+The design system should prioritize:
+
+**Color Harmony + Composition + Geometry + Simplicity + Professional Quality + Uniqueness.**
