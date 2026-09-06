@@ -1,318 +1,511 @@
-document.addEventListener("DOMContentLoaded", () => {
-    
-    let masterSeed = Math.random() * 10000;
-    let currentSeed;
-    
-    function seededRandom() {
-        let x = Math.sin(currentSeed++) * 10000;
-        return x - Math.floor(x);
+/**
+ * COLOR POSTER LAB
+ * Professional, deterministic layout generator.
+ */
+
+/* --- 1. CORE DATA & PROFESSIONAL PALETTES --- */
+const RESOLUTIONS = {
+    "1:1": { w: 1080, h: 1080 },
+    "4:5": { w: 1080, h: 1350 },
+    "9:16": { w: 1080, h: 1920 },
+    "16:9": { w: 1920, h: 1080 },
+    "2:3": { w: 1200, h: 1800 },
+    "A4": { w: 2480, h: 3508 }
+};
+
+const PALETTES = {
+    random: { name: "Random Professional", colors: [] },
+    swiss: { name: "Swiss Editorial", colors: ["#D92525", "#F2F2F2", "#0D0D0D", "#4B4B4B", "#1C355E"] },
+    minimal: { name: "Minimalist Sand", colors: ["#EBE8E3", "#D2C5B6", "#1C1C1C", "#9A8C78"] },
+    luxury: { name: "Luxury Obsidian", colors: ["#121212", "#D4AF37", "#2C2C2C", "#F8F5EE", "#8A7334"] },
+    corporate: { name: "Corporate Trust", colors: ["#0F4C81", "#F5F7FA", "#2D3748", "#EDF2F7", "#3182CE"] },
+    neon: { name: "Cyber Neon", colors: ["#0B0C10", "#1F2833", "#66FCF1", "#45A29E", "#C5C6C7", "#F048C6"] },
+    earth: { name: "Earth & Flora", colors: ["#3D5A80", "#98C1D9", "#E0FBFC", "#EE6C4D", "#293241"] },
+    pastel: { name: "Soft Dream", colors: ["#FFD1DC", "#B39EB5", "#AEC6CF", "#FDFD96", "#FFB347"] },
+    ocean: { name: "Deep Ocean", colors: ["#001B2E", "#1D3F58", "#537692", "#B3CDE0", "#E1EDF4"] },
+    warm: { name: "Sunset Blaze", colors: ["#2C0703", "#890620", "#B6465F", "#DA9F93", "#EBD4CB"] },
+    monochrome: { name: "Graphite Grayscale", colors: ["#000000", "#333333", "#666666", "#999999", "#CCCCCC", "#F2F2F2"] }
+};
+
+const ADJECTIVES = ["Midnight", "Azure", "Crimson", "Emerald", "Golden", "Indigo", "Oceanic", "Terra", "Soft", "Bold", "Abstract", "Luminous"];
+const NOUNS = ["Geometry", "Editorial", "Structure", "Balance", "Horizon", "Blocks", "Form", "Grid", "Composition", "Vibe"];
+
+/* --- 2. STATE MANAGEMENT --- */
+let state = {
+    seed: "",
+    currentDesign: null,
+    history: JSON.parse(localStorage.getItem("cpl_history")) || [],
+    favorites: JSON.parse(localStorage.getItem("cpl_favorites")) || []
+};
+
+// UI Elements
+const canvas = document.getElementById("poster-canvas");
+const ctx = canvas.getContext("2d");
+const els = {
+    aspect: document.getElementById("aspect-ratio"),
+    mode: document.getElementById("design-mode"),
+    style: document.getElementById("design-style"),
+    palette: document.getElementById("color-palette"),
+    customColors: document.getElementById("custom-colors"),
+    complexity: document.getElementById("complexity"),
+    seedInput: document.getElementById("seed-input"),
+    metaName: document.getElementById("meta-name"),
+    metaDetails: document.getElementById("meta-details"),
+    btnFav: document.getElementById("btn-favorite"),
+    gridHistory: document.getElementById("history-grid"),
+    gridFavorites: document.getElementById("favorites-grid")
+};
+
+/* --- 3. PRNG (Deterministic Random Engine) --- */
+let seededRandom = Math.random;
+
+function xmur3(str) {
+    for(var i = 0, h = 1779033703 ^ str.length; i < str.length; i++) {
+        h = Math.imul(h ^ str.charCodeAt(i), 3432918353);
+        h = h << 13 | h >>> 19;
+    } return function() {
+        h = Math.imul(h ^ (h >>> 16), 2246822507);
+        h = Math.imul(h ^ (h >>> 13), 3266489909);
+        return (h ^= h >>> 16) >>> 0;
+    }
+}
+
+function mulberry32(a) {
+    return function() {
+        var t = a += 0x6D2B79F5;
+        t = Math.imul(t ^ t >>> 15, t | 1);
+        t ^= t + Math.imul(t ^ t >>> 7, t | 61);
+        return ((t ^ t >>> 14) >>> 0) / 4294967296;
+    }
+}
+
+function initPRNG(seedStr) {
+    const seed = xmur3(seedStr)();
+    seededRandom = mulberry32(seed);
+}
+
+// Random utilities using the deterministic PRNG
+function rand(min, max) { return seededRandom() * (max - min) + min; }
+function randInt(min, max) { return Math.floor(rand(min, max + 1)); }
+function randArr(arr) { return arr[randInt(0, arr.length - 1)]; }
+function generateSeedStr() { return "CP-" + Math.random().toString(36).substring(2, 10).toUpperCase(); }
+
+/* --- 4. DRAWING ENGINE & TEMPLATES --- */
+
+class PosterGenerator {
+    constructor(ctx, config) {
+        this.ctx = ctx;
+        this.w = config.w;
+        this.h = config.h;
+        this.palette = config.colors;
+        this.mode = config.mode; // solid, gradient, mixed
+        this.density = config.density; // low, medium, high
+        
+        // Number of iterations based on density
+        this.complexity = this.density === 'low' ? 3 : this.density === 'medium' ? 6 : 12;
     }
 
-    const inputs = document.querySelectorAll("input[type=range], select");
+    getColor() { return randArr(this.palette); }
 
-    inputs.forEach(input => {
-        input.addEventListener("input", (e) => {
-            if (e.target.type === "range") {
-                const targetId = e.target.id;
-                const suffix = e.target.getAttribute("data-suffix");
-                document.getElementById(`val-${targetId}`).innerHTML = `${e.target.value}${suffix}`;
+    getFillStyle(w, h, x, y) {
+        if (this.mode === 'solid' || (this.mode === 'mixed' && seededRandom() > 0.5)) {
+            return this.getColor();
+        } else {
+            // Gradient
+            let x2 = x + (seededRandom() > 0.5 ? w : 0);
+            let y2 = y + (seededRandom() > 0.5 ? h : 0);
+            let grad = this.ctx.createLinearGradient(x, y, x2, y2);
+            grad.addColorStop(0, this.getColor());
+            grad.addColorStop(1, this.getColor());
+            if (seededRandom() > 0.7) grad.addColorStop(0.5, this.getColor());
+            return grad;
+        }
+    }
+
+    clear() {
+        this.ctx.fillStyle = this.getColor();
+        this.ctx.fillRect(0, 0, this.w, this.h);
+    }
+
+    // Template 1: Minimalist Grid / Mondrian Style
+    drawMinimalist() {
+        this.clear();
+        const split = (x, y, w, h, depth) => {
+            if (depth <= 0 || (depth < this.complexity && seededRandom() > 0.7)) {
+                this.ctx.fillStyle = this.getFillStyle(w, h, x, y);
+                this.ctx.fillRect(x, y, w, h);
+                // Subtle border
+                this.ctx.strokeStyle = this.getColor();
+                this.ctx.lineWidth = rand(1, 5);
+                this.ctx.strokeRect(x, y, w, h);
+                return;
             }
-            if (e.target.id === "design-mode") masterSeed = Math.random() * 10000;
-            generateDesigns();
+            if (w > h) { // split vertically
+                let splitPoint = w * rand(0.3, 0.7);
+                split(x, y, splitPoint, h, depth - 1);
+                split(x + splitPoint, y, w - splitPoint, h, depth - 1);
+            } else { // split horizontally
+                let splitPoint = h * rand(0.3, 0.7);
+                split(x, y, w, splitPoint, depth - 1);
+                split(x, y + splitPoint, w, h - splitPoint, depth - 1);
+            }
+        };
+        split(0, 0, this.w, this.h, Math.min(this.complexity, 6));
+    }
+
+    // Template 2: Geometric Blocks
+    drawGeometric() {
+        this.clear();
+        for (let i = 0; i < this.complexity * 2; i++) {
+            this.ctx.fillStyle = this.getFillStyle(this.w, this.h, 0, 0);
+            this.ctx.beginPath();
+            let shapeType = randInt(1, 3);
+            let cx = rand(0, this.w);
+            let cy = rand(0, this.h);
+            let size = rand(this.w * 0.1, this.w * 0.8);
+
+            if (shapeType === 1) { // Circle
+                this.ctx.arc(cx, cy, size / 2, 0, Math.PI * 2);
+            } else if (shapeType === 2) { // Rectangle
+                this.ctx.rect(cx - size/2, cy - size/2, size, size * rand(0.5, 2));
+            } else { // Triangle / Polygon
+                this.ctx.moveTo(cx, cy - size/2);
+                this.ctx.lineTo(cx + size/2, cy + size/2);
+                this.ctx.lineTo(cx - size/2, cy + size/2);
+            }
+            this.ctx.fill();
+        }
+    }
+
+    // Template 3: Diagonal Split
+    drawDiagonal() {
+        this.clear();
+        const slices = this.complexity + 2;
+        for(let i=0; i<slices; i++) {
+            this.ctx.fillStyle = this.getFillStyle(this.w, this.h, 0, 0);
+            this.ctx.beginPath();
+            if (seededRandom() > 0.5) {
+                this.ctx.moveTo(0, rand(0, this.h));
+                this.ctx.lineTo(this.w, rand(0, this.h));
+                this.ctx.lineTo(this.w, this.h);
+                this.ctx.lineTo(0, this.h);
+            } else {
+                this.ctx.moveTo(rand(0, this.w), 0);
+                this.ctx.lineTo(rand(0, this.w), this.h);
+                this.ctx.lineTo(this.w, this.h);
+                this.ctx.lineTo(this.w, 0);
+            }
+            this.ctx.fill();
+        }
+    }
+
+    // Template 4: Abstract Organic / Soft 
+    drawAbstract() {
+        this.clear();
+        for (let i = 0; i < this.complexity * 3; i++) {
+            let cx = rand(-0.2*this.w, 1.2*this.w);
+            let cy = rand(-0.2*this.h, 1.2*this.h);
+            let r = rand(this.w * 0.2, this.w * 0.9);
+            
+            let grad = this.ctx.createRadialGradient(cx, cy, 0, cx, cy, r);
+            grad.addColorStop(0, this.getColor());
+            
+            // To simulate soft/organic without blur filters, we fade to transparent
+            // Requires parsing hex to rgba
+            let c = this.getColor();
+            let rgb = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(c);
+            let rgbaStr = rgb ? `rgba(${parseInt(rgb[1], 16)}, ${parseInt(rgb[2], 16)}, ${parseInt(rgb[3], 16)}, 0)` : 'transparent';
+            
+            grad.addColorStop(1, rgbaStr);
+            this.ctx.fillStyle = grad;
+            this.ctx.beginPath();
+            this.ctx.arc(cx, cy, r, 0, Math.PI * 2);
+            this.ctx.fill();
+        }
+    }
+
+    // Template 5: Modern Editorial (Typography placeholders + Negative space)
+    drawEditorial() {
+        this.clear();
+        // Big block of negative space
+        this.ctx.fillStyle = this.getColor();
+        let blockW = this.w * rand(0.5, 0.9);
+        let blockH = this.h * rand(0.4, 0.8);
+        this.ctx.fillRect(this.w/2 - blockW/2, this.h/2 - blockH/2, blockW, blockH);
+        
+        // Decorator lines
+        this.ctx.strokeStyle = this.getColor();
+        this.ctx.lineWidth = rand(2, 10);
+        this.ctx.beginPath();
+        this.ctx.moveTo(this.w * 0.1, this.h * 0.1);
+        this.ctx.lineTo(this.w * 0.9, this.h * 0.1);
+        this.ctx.stroke();
+
+        // Accent shapes
+        for(let i=0; i<3; i++) {
+            this.ctx.fillStyle = this.getFillStyle(this.w, this.h, 0, 0);
+            this.ctx.beginPath();
+            this.ctx.arc(rand(0, this.w), rand(0, this.h), rand(10, 100), 0, Math.PI*2);
+            this.ctx.fill();
+        }
+    }
+}
+
+/* --- 5. MAIN GENERATION LOGIC --- */
+
+function generateDesign(specificSeed = null, skipHistory = false) {
+    const seed = specificSeed || generateSeedStr();
+    initPRNG(seed);
+
+    // Resolution
+    const ratioStr = els.aspect.value;
+    const res = RESOLUTIONS[ratioStr];
+    canvas.width = res.w;
+    canvas.height = res.h;
+
+    // Palette Resolution
+    let palKey = els.palette.value;
+    let colors = [];
+    let palName = "";
+
+    // Handle Custom Colors
+    let customStr = els.customColors.value.trim();
+    if (customStr) {
+        colors = customStr.split(",").map(c => c.trim()).filter(c => /^#[0-9A-F]{6}$/i.test(c));
+        if(colors.length > 0) {
+            palName = "Custom Colors";
+        } else {
+            customStr = ""; // reset if invalid
+        }
+    }
+    
+    if (!customStr || colors.length === 0) {
+        if (palKey === "random") {
+            const keys = Object.keys(PALETTES).filter(k => k !== "random");
+            palKey = randArr(keys);
+        }
+        colors = PALETTES[palKey].colors;
+        palName = PALETTES[palKey].name;
+    }
+
+    // Style Resolution
+    let styleKey = els.style.value;
+    if (styleKey === "random") {
+        const styles = ["minimalist", "geometric", "diagonal", "abstract", "editorial"];
+        styleKey = randArr(styles);
+    }
+
+    // Generate Name
+    const designName = `${randArr(ADJECTIVES)} ${randArr(NOUNS)}`;
+    
+    // Draw
+    const generator = new PosterGenerator(ctx, {
+        w: res.w, h: res.h,
+        colors: colors,
+        mode: els.mode.value,
+        density: els.complexity.value
+    });
+
+    switch(styleKey) {
+        case 'minimalist': generator.drawMinimalist(); break;
+        case 'geometric': generator.drawGeometric(); break;
+        case 'diagonal': generator.drawDiagonal(); break;
+        case 'abstract': generator.drawAbstract(); break;
+        case 'editorial': generator.drawEditorial(); break;
+    }
+
+    // Save state
+    state.currentDesign = {
+        id: seed, name: designName, style: styleKey, palette: palName,
+        dataUrl: canvas.toDataURL("image/png", 0.9) // store thumbnail version
+    };
+
+    // Update UI
+    els.seedInput.value = seed;
+    els.metaName.innerText = designName;
+    els.metaDetails.innerText = `Style: ${styleKey.toUpperCase()} | Palette: ${palName}`;
+    checkFavoriteStatus();
+
+    // Add to history
+    if (!skipHistory) {
+        addToHistory(state.currentDesign);
+    }
+}
+
+/* --- 6. HISTORY & FAVORITES MANAGEMENT --- */
+
+function addToHistory(design) {
+    // Avoid immediate duplicates in history display
+    if (state.history.length > 0 && state.history[0].id === design.id) return;
+    state.history.unshift(design);
+    if (state.history.length > 50) state.history.pop();
+    localStorage.setItem("cpl_history", JSON.stringify(state.history));
+    renderGrids();
+}
+
+function toggleFavorite() {
+    if(!state.currentDesign) return;
+    const exists = state.favorites.findIndex(f => f.id === state.currentDesign.id);
+    if (exists > -1) {
+        state.favorites.splice(exists, 1);
+    } else {
+        state.favorites.unshift(state.currentDesign);
+    }
+    localStorage.setItem("cpl_favorites", JSON.stringify(state.favorites));
+    checkFavoriteStatus();
+    renderGrids();
+}
+
+function checkFavoriteStatus() {
+    if(!state.currentDesign) return;
+    const exists = state.favorites.some(f => f.id === state.currentDesign.id);
+    els.btnFav.classList.toggle("favorited", exists);
+    els.btnFav.innerText = exists ? "♥" : "♡";
+}
+
+function renderGrids() {
+    const createCard = (item, isFav) => {
+        const div = document.createElement("div");
+        div.className = "gallery-item";
+        div.innerHTML = `
+            <img src="${item.dataUrl}" alt="${item.name}" loading="lazy">
+            <div class="gallery-item-info">
+                <h4>${item.name}</h4>
+                <p>${item.palette}</p>
+            </div>
+        `;
+        div.onclick = () => {
+            els.seedInput.value = item.id;
+            generateDesign(item.id, true);
+            document.querySelector('[data-tab="generator"]').click();
+        };
+        return div;
+    };
+
+    els.gridHistory.innerHTML = "";
+    state.history.forEach(item => els.gridHistory.appendChild(createCard(item, false)));
+
+    els.gridFavorites.innerHTML = "";
+    state.favorites.forEach(item => els.gridFavorites.appendChild(createCard(item, true)));
+}
+
+/* --- 7. EXPORT / DOWNLOAD LOGIC --- */
+
+function downloadCanvas(filename) {
+    const link = document.createElement("a");
+    link.download = filename + ".png";
+    link.href = canvas.toDataURL("image/png", 1.0);
+    link.click();
+}
+
+async function downloadAll() {
+    if (state.history.length === 0) return alert("No designs in history!");
+    if (typeof JSZip !== 'undefined') {
+        const zip = new JSZip();
+        // Generate high res versions for recent 10 to avoid locking browser UI completely
+        const itemsToExport = state.history.slice(0, 10);
+        
+        // Save current UI state
+        const currentSeed = state.currentDesign.id;
+        
+        for (let i = 0; i < itemsToExport.length; i++) {
+            const item = itemsToExport[i];
+            generateDesign(item.id, true); // Render to canvas
+            const data = canvas.toDataURL("image/png", 1.0).split(',')[1];
+            zip.file(`${item.name.replace(/ /g, "_")}_${item.id}.png`, data, {base64: true});
+        }
+        
+        // Restore original UI
+        generateDesign(currentSeed, true);
+
+        const content = await zip.generateAsync({type:"blob"});
+        const link = document.createElement("a");
+        link.href = URL.createObjectURL(content);
+        link.download = "Poster_Designs.zip";
+        link.click();
+    } else {
+        alert("JSZip library not loaded. Downloading top 3 individually...");
+        for (let i = 0; i < Math.min(3, state.history.length); i++) {
+            generateDesign(state.history[i].id, true);
+            downloadCanvas(`Poster_${state.history[i].id}`);
+        }
+    }
+}
+
+/* --- 8. INITIALIZATION & EVENTS --- */
+
+function initApp() {
+    // Populate Selects
+    for (let key in PALETTES) {
+        let opt = document.createElement("option");
+        opt.value = key;
+        opt.innerText = PALETTES[key].name;
+        els.palette.appendChild(opt);
+    }
+
+    // Event Listeners
+    document.getElementById("btn-generate").addEventListener("click", () => generateDesign());
+    
+    document.getElementById("btn-generate-10").addEventListener("click", () => {
+        for(let i=0; i<10; i++) generateDesign(); // The last one will remain on canvas
+    });
+    
+    document.getElementById("btn-similar").addEventListener("click", () => {
+        // Keeps UI settings but generates new seed
+        generateDesign(); 
+    });
+
+    document.getElementById("btn-randomize").addEventListener("click", () => {
+        els.aspect.selectedIndex = randInt(0, els.aspect.options.length - 1);
+        els.mode.selectedIndex = randInt(0, els.mode.options.length - 1);
+        els.style.selectedIndex = randInt(0, els.style.options.length - 1);
+        els.palette.selectedIndex = randInt(0, els.palette.options.length - 1);
+        els.customColors.value = "";
+        els.complexity.selectedIndex = randInt(0, els.complexity.options.length - 1);
+        generateDesign();
+    });
+
+    els.btnFav.addEventListener("click", toggleFavorite);
+    document.getElementById("btn-download").addEventListener("click", () => {
+        if(state.currentDesign) downloadCanvas(`${state.currentDesign.name}_${state.currentDesign.id}`);
+    });
+
+    document.getElementById("btn-download-all").addEventListener("click", downloadAll);
+    document.getElementById("btn-clear-favorites").addEventListener("click", () => {
+        if(confirm("Clear all favorites?")) {
+            state.favorites = [];
+            localStorage.setItem("cpl_favorites", JSON.stringify([]));
+            renderGrids();
+            checkFavoriteStatus();
+        }
+    });
+
+    document.getElementById("btn-copy-seed").addEventListener("click", () => {
+        navigator.clipboard.writeText(els.seedInput.value);
+        alert("Seed copied to clipboard!");
+    });
+
+    // Tab Navigation
+    document.querySelectorAll(".nav-btn").forEach(btn => {
+        btn.addEventListener("click", (e) => {
+            document.querySelectorAll(".nav-btn").forEach(b => b.classList.remove("active"));
+            e.target.classList.add("active");
+            
+            document.getElementById("tab-generator").classList.add("hidden");
+            document.getElementById("tab-gallery").classList.add("hidden");
+            document.getElementById("tab-favorites").classList.add("hidden");
+            
+            document.getElementById("tab-" + e.target.dataset.tab).classList.remove("hidden");
+            
+            // Re-render grids if navigating away from generator
+            if(e.target.dataset.tab !== "generator") renderGrids();
         });
     });
 
-    function createBlobPath(ctx, cx, cy, r, c) {
-        ctx.beginPath();
-        const points = 12;
-        for (let i = 0; i <= points; i++) {
-            const angle = (i / points) * Math.PI * 2;
-            const dist = r + (seededRandom() - 0.5) * c;
-            const x = cx + Math.cos(angle) * dist;
-            const y = cy + Math.sin(angle) * dist;
-            if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
-        }
-        ctx.closePath();
-    }
+    // First Render
+    renderGrids();
+    generateDesign();
+}
 
-    function generateDesigns() {
-        const posterCount = parseInt(document.getElementById("poster-count").value);
-        const designMode = document.getElementById("design-mode").value;
-        const density = parseInt(document.getElementById("density").value);
-        const frequency = parseInt(document.getElementById("frequency").value);
-        const amplitude = parseInt(document.getElementById("amplitude").value);
-        const chaos = parseInt(document.getElementById("chaos").value);
-        const thickness = parseInt(document.getElementById("thickness").value);
-
-        document.querySelectorAll(".poster").forEach((el, i) => el.style.display = i < posterCount ? "block" : "none");
-
-        const palettes = [
-            { bg1: "#2b0055", bg2: "#8e1957", strokeHue: 45 },
-            { bg1: "#000c24", bg2: "#004882", strokeHue: 190 },
-            { bg1: "#00301c", bg2: "#197645", strokeHue: 340 },
-            { bg1: "#4a0000", bg2: "#a83200", strokeHue: 60 }
-        ];
-
-        document.querySelectorAll(".poster canvas").forEach((canvas, index) => {
-            if (index >= posterCount) return;
-
-            currentSeed = masterSeed + (index * 9999);
-            const uniqueOffset = seededRandom() * 1000;
-
-            const ctx = canvas.getContext("2d");
-            const width = canvas.width;
-            const height = canvas.height;
-            const centerX = width / 2;
-            const centerY = height / 2;
-            
-            ctx.restore();
-            ctx.save();
-            ctx.clearRect(0, 0, width, height);
-
-            const gradient = ctx.createLinearGradient(0, 0, 0, height);
-            gradient.addColorStop(0, palettes[index].bg1);
-            gradient.addColorStop(1, palettes[index].bg2);
-            ctx.fillStyle = gradient;
-            ctx.fillRect(0, 0, width, height);
-
-            ctx.lineWidth = thickness / 5;
-            ctx.lineJoin = "round";
-            ctx.lineCap = "round";
-
-            // ==========================================
-            // NEW COMBO AESTHETICS
-            // ==========================================
-
-            if (designMode === "retro-bubble") {
-                for (let i = 0; i < density * 1.5; i++) {
-                    const x = seededRandom() * width;
-                    const y = seededRandom() * height;
-                    const r = (amplitude / 3) + (seededRandom() * amplitude);
-                    const hue = (palettes[index].strokeHue + seededRandom() * 60) % 360;
-                    
-                    // Retro misregistered print shadow
-                    const offset = chaos / 4;
-                    ctx.fillStyle = `hsla(${hue}, 80%, 50%, 0.8)`;
-                    ctx.beginPath(); ctx.arc(x - offset, y + offset, r, 0, Math.PI * 2); ctx.fill();
-                    
-                    // Crisp outline Bubble
-                    ctx.strokeStyle = '#fff';
-                    ctx.lineWidth = thickness / 3;
-                    ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); ctx.stroke();
-                }
-            }
-            
-            else if (designMode === "mandala-sacred") {
-                const layers = Math.max(3, Math.floor(density / 2));
-                for (let i = 1; i <= layers; i++) {
-                    const r = (width * 0.8) * (i / layers) * (amplitude / 100);
-                    ctx.strokeStyle = `hsl(${(palettes[index].strokeHue + i * 15) % 360}, 100%, 75%)`;
-                    
-                    // Symmetrical circle
-                    ctx.beginPath(); ctx.arc(centerX, centerY, r, 0, Math.PI * 2); ctx.stroke();
-                    
-                    // Intersecting sacred geometry polygons
-                    const sides = 3 + Math.floor(chaos / 15);
-                    if (i % 2 === 0 || chaos > 50) {
-                        ctx.beginPath();
-                        for (let s = 0; s <= sides; s++) {
-                            // Rotate differently per canvas and layer
-                            const angle = (s * (Math.PI * 2) / sides) + (uniqueOffset / 10) + (i * 0.2);
-                            const px = centerX + r * Math.cos(angle);
-                            const py = centerY + r * Math.sin(angle);
-                            if (s === 0) ctx.moveTo(px, py); else ctx.lineTo(px, py);
-                        }
-                        ctx.stroke();
-                    }
-                }
-            }
-
-            else if (designMode === "y2k-chrome") {
-                // 1. Wireframe Globe background
-                ctx.strokeStyle = 'rgba(255, 255, 255, 0.2)';
-                const rings = Math.floor(density / 3) + 3;
-                for (let w = 0; w < rings; w++) {
-                    ctx.beginPath();
-                    ctx.ellipse(centerX, centerY, amplitude + (w * 15), (amplitude / 2) + (chaos * w) + 10, uniqueOffset, 0, Math.PI * 2);
-                    ctx.stroke();
-                }
-
-                // 2. Chrome Starbursts
-                for (let i = 0; i < density; i++) {
-                    const x = seededRandom() * width;
-                    const y = seededRandom() * height;
-                    const size = (amplitude / 3) + seededRandom() * amplitude;
-                    
-                    // Metallic gradient fill
-                    const starGrad = ctx.createRadialGradient(x, y, 0, x, y, size);
-                    starGrad.addColorStop(0, '#ffffff');
-                    starGrad.addColorStop(0.5, `hsl(${palettes[index].strokeHue}, 20%, 70%)`);
-                    starGrad.addColorStop(1, `hsl(${palettes[index].strokeHue}, 50%, 20%)`);
-                    
-                    ctx.fillStyle = starGrad;
-                    ctx.strokeStyle = '#fff';
-                    ctx.lineWidth = thickness / 5;
-                    
-                    ctx.beginPath();
-                    for (let s = 0; s < 8; s++) {
-                        const angle = s * Math.PI / 4 + uniqueOffset;
-                        const dist = (s % 2 === 0) ? size : size / 4;
-                        const px = x + Math.cos(angle) * dist;
-                        const py = y + Math.sin(angle) * dist;
-                        if (s === 0) ctx.moveTo(px, py); else ctx.lineTo(px, py);
-                    }
-                    ctx.fill(); ctx.stroke();
-                }
-            }
-
-            else if (designMode === "floral-mandala") {
-                const petals = 6 + Math.floor(chaos / 10);
-                for (let i = density; i > 0; i--) {
-                    const r = i * (amplitude / 4) + 10;
-                    ctx.fillStyle = `hsla(${(palettes[index].strokeHue + i * 20) % 360}, 80%, 60%, 0.6)`;
-                    ctx.strokeStyle = `hsl(${(palettes[index].strokeHue + 180) % 360}, 100%, 85%)`; // Complementary outline
-                    
-                    for (let p = 0; p < petals; p++) {
-                        const angle = (p * Math.PI * 2 / petals) + (i * 0.15) + uniqueOffset;
-                        const px = centerX + (r * 0.7) * Math.cos(angle);
-                        const py = centerY + (r * 0.7) * Math.sin(angle);
-                        
-                        ctx.beginPath();
-                        ctx.ellipse(px, py, r / 1.5, r / 4, angle, 0, Math.PI * 2);
-                        ctx.fill(); ctx.stroke();
-                    }
-                }
-            }
-
-            else if (designMode === "memphis-geo") {
-                for (let i = 0; i < density * 1.5; i++) {
-                    const shapeType = Math.floor(seededRandom() * 4);
-                    const x = seededRandom() * width;
-                    const y = seededRandom() * height;
-                    const size = (amplitude / 4) + seededRandom() * (amplitude / 1.5);
-                    
-                    ctx.fillStyle = `hsl(${(palettes[index].strokeHue + seededRandom() * 120) % 360}, 90%, 60%)`;
-                    ctx.strokeStyle = '#111'; // Heavy dark borders characteristic of Memphis
-                    ctx.lineWidth = thickness / 2.5;
-
-                    ctx.save();
-                    ctx.translate(x, y);
-                    ctx.rotate(seededRandom() * Math.PI * 2); // Random rotation
-
-                    if (shapeType === 0) {
-                        // Pill / Capsule
-                        ctx.beginPath(); ctx.roundRect(-size, -size/2, size*2, size, size/2); ctx.fill(); ctx.stroke();
-                    } else if (shapeType === 1) {
-                        // Squiggle
-                        ctx.beginPath();
-                        for(let sq = 0; sq < 5; sq++){
-                            const sx = (sq - 2) * (size / 1.5);
-                            const sy = (sq % 2 === 0) ? size/2 : -size/2;
-                            if(sq === 0) ctx.moveTo(sx, sy); else ctx.lineTo(sx, sy);
-                        }
-                        ctx.stroke();
-                    } else if (shapeType === 2) {
-                        // Sharp Triangle
-                        ctx.beginPath();
-                        ctx.moveTo(0, -size); ctx.lineTo(size, size); ctx.lineTo(-size, size); ctx.closePath();
-                        ctx.fill(); ctx.stroke();
-                    } else {
-                        // Floating dots
-                        ctx.fillStyle = '#111';
-                        ctx.beginPath(); ctx.arc(0, 0, thickness, 0, Math.PI*2); ctx.fill();
-                    }
-                    ctx.restore();
-                }
-            }
-
-            else if (designMode === "psychedelic") {
-                // Saturated lava-lamp blobs
-                for (let i = density; i > 0; i--) {
-                    // Intense rainbow cycle
-                    ctx.fillStyle = `hsl(${(palettes[index].strokeHue + i * (360 / density) + (uniqueOffset * 10)) % 360}, 90%, 55%)`; 
-                    const r = i * (amplitude / 3) + 20;
-                    
-                    ctx.beginPath();
-                    const points = 20;
-                    for (let p = 0; p <= points; p++) {
-                        const angle = p * (Math.PI * 2) / points;
-                        // Extreme warping
-                        const warp = Math.sin(angle * (chaos / 6) + uniqueOffset) * (chaos * 1.5);
-                        const px = centerX + (r + warp) * Math.cos(angle);
-                        const py = centerY + (r + warp) * Math.sin(angle);
-                        if (p === 0) ctx.moveTo(px, py); else ctx.lineTo(px, py);
-                    }
-                    ctx.closePath();
-                    ctx.fill();
-                    ctx.strokeStyle = 'rgba(0,0,0,0.3)'; // Soft inner shadow border
-                    ctx.stroke();
-                }
-            }
-            
-            // ==========================================
-            // ORIGINAL AESTHETICS (Kept a few classics)
-            // ==========================================
-            
-            else if (designMode === "watercolor") {
-                for (let i = 0; i < density * 2; i++) {
-                    const x = seededRandom() * width;
-                    const y = seededRandom() * height;
-                    const r = (amplitude / 4) + (seededRandom() * amplitude / 2);
-                    const hue = (palettes[index].strokeHue + (seededRandom() * 50) - 25) % 360;
-                    
-                    ctx.globalAlpha = 0.4;
-                    ctx.fillStyle = `hsl(${hue}, 90%, 65%)`;
-                    ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); ctx.fill();
-                    ctx.globalAlpha = 0.8;
-                    ctx.lineWidth = thickness / 8;
-                    ctx.strokeStyle = `hsl(${hue}, 100%, 85%)`;
-                    ctx.stroke();
-                }
-            }
-            else if (designMode === "fluid") {
-                for (let i = 0; i < density / 2; i++) {
-                    const r = (amplitude) + (seededRandom() * 50);
-                    const x = centerX + (seededRandom() - 0.5) * chaos * 2;
-                    const y = centerY + (seededRandom() - 0.5) * chaos * 2;
-                    createBlobPath(ctx, x, y, r, chaos);
-                    ctx.fillStyle = `hsla(${(palettes[index].strokeHue + i * 20)%360}, 80%, 60%, 0.5)`;
-                    ctx.fill();
-                }
-            } 
-            else if (designMode === "papercut") {
-                ctx.shadowColor = 'rgba(0,0,0,0.6)';
-                ctx.shadowBlur = 20;
-                const layers = Math.max(3, Math.floor(density / 3));
-                for (let i = 0; i < layers; i++) {
-                    const r = (width * 0.8) - (i * (width * 0.8 / layers));
-                    ctx.fillStyle = `hsl(${palettes[index].strokeHue + (i * 15)}, 80%, ${30 + (i * 10)}%)`;
-                    createBlobPath(ctx, centerX, centerY, r, chaos + (amplitude / 2));
-                    ctx.fill();
-                }
-                ctx.shadowBlur = 0;
-            }
-            else {
-                // Mixed fallback
-                for (let i = 1; i <= density; i++) {
-                    ctx.beginPath();
-                    const hue = (palettes[index].strokeHue + (i * 3)) % 360;
-                    ctx.strokeStyle = `hsl(${hue}, 100%, 85%)`;
-                    const radius = 10 + (i * (amplitude / 5));
-                    
-                    for (let angle = 0; angle <= Math.PI * 2 + 0.1; angle += 0.1) {
-                        const distortion = Math.sin(angle * (chaos / 10)) * (chaos / 3);
-                        const x = centerX + Math.cos(angle) * (radius + distortion);
-                        const y = centerY + Math.sin(angle) * (radius + distortion);
-                        if (angle === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
-                    }
-                    ctx.closePath();
-                    ctx.stroke();
-                }
-            }
-            
-            ctx.restore();
-        });
-    }
-
-    generateDesigns();
-});
+// Start
+initApp();
