@@ -4,13 +4,14 @@
  */
 
 /* --- 1. CORE DATA & PROFESSIONAL PALETTES --- */
+// Base resolutions multiplied by 3 for massive 3x output
 const RESOLUTIONS = {
-    "1:1": { w: 1080, h: 1080 },
-    "4:5": { w: 1080, h: 1350 },
-    "9:16": { w: 1080, h: 1920 },
-    "16:9": { w: 1920, h: 1080 },
-    "2:3": { w: 1200, h: 1800 },
-    "A4": { w: 2480, h: 3508 }
+    "1:1": { w: 3240, h: 3240 },
+    "4:5": { w: 3240, h: 4050 },
+    "9:16": { w: 3240, h: 5760 },
+    "16:9": { w: 5760, h: 3240 },
+    "2:3": { w: 3600, h: 5400 },
+    "A4": { w: 7440, h: 10524 }
 };
 
 const PALETTES = {
@@ -98,10 +99,9 @@ class PosterGenerator {
         this.w = config.w;
         this.h = config.h;
         this.palette = config.colors;
-        this.mode = config.mode; // solid, gradient, mixed
-        this.density = config.density; // low, medium, high
+        this.mode = config.mode;
+        this.density = config.density;
         
-        // Number of iterations based on density
         this.complexity = this.density === 'low' ? 3 : this.density === 'medium' ? 6 : 12;
     }
 
@@ -111,7 +111,6 @@ class PosterGenerator {
         if (this.mode === 'solid' || (this.mode === 'mixed' && seededRandom() > 0.5)) {
             return this.getColor();
         } else {
-            // Gradient
             let x2 = x + (seededRandom() > 0.5 ? w : 0);
             let y2 = y + (seededRandom() > 0.5 ? h : 0);
             let grad = this.ctx.createLinearGradient(x, y, x2, y2);
@@ -134,17 +133,16 @@ class PosterGenerator {
             if (depth <= 0 || (depth < this.complexity && seededRandom() > 0.7)) {
                 this.ctx.fillStyle = this.getFillStyle(w, h, x, y);
                 this.ctx.fillRect(x, y, w, h);
-                // Subtle border
                 this.ctx.strokeStyle = this.getColor();
-                this.ctx.lineWidth = rand(1, 5);
+                this.ctx.lineWidth = rand(3, 15); // Scaled up for 3x resolution
                 this.ctx.strokeRect(x, y, w, h);
                 return;
             }
-            if (w > h) { // split vertically
+            if (w > h) {
                 let splitPoint = w * rand(0.3, 0.7);
                 split(x, y, splitPoint, h, depth - 1);
                 split(x + splitPoint, y, w - splitPoint, h, depth - 1);
-            } else { // split horizontally
+            } else {
                 let splitPoint = h * rand(0.3, 0.7);
                 split(x, y, w, splitPoint, depth - 1);
                 split(x, y + splitPoint, w, h - splitPoint, depth - 1);
@@ -164,11 +162,11 @@ class PosterGenerator {
             let cy = rand(0, this.h);
             let size = rand(this.w * 0.1, this.w * 0.8);
 
-            if (shapeType === 1) { // Circle
+            if (shapeType === 1) {
                 this.ctx.arc(cx, cy, size / 2, 0, Math.PI * 2);
-            } else if (shapeType === 2) { // Rectangle
+            } else if (shapeType === 2) {
                 this.ctx.rect(cx - size/2, cy - size/2, size, size * rand(0.5, 2));
-            } else { // Triangle / Polygon
+            } else {
                 this.ctx.moveTo(cx, cy - size/2);
                 this.ctx.lineTo(cx + size/2, cy + size/2);
                 this.ctx.lineTo(cx - size/2, cy + size/2);
@@ -210,8 +208,6 @@ class PosterGenerator {
             let grad = this.ctx.createRadialGradient(cx, cy, 0, cx, cy, r);
             grad.addColorStop(0, this.getColor());
             
-            // To simulate soft/organic without blur filters, we fade to transparent
-            // Requires parsing hex to rgba
             let c = this.getColor();
             let rgb = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(c);
             let rgbaStr = rgb ? `rgba(${parseInt(rgb[1], 16)}, ${parseInt(rgb[2], 16)}, ${parseInt(rgb[3], 16)}, 0)` : 'transparent';
@@ -224,28 +220,25 @@ class PosterGenerator {
         }
     }
 
-    // Template 5: Modern Editorial (Typography placeholders + Negative space)
+    // Template 5: Modern Editorial
     drawEditorial() {
         this.clear();
-        // Big block of negative space
         this.ctx.fillStyle = this.getColor();
         let blockW = this.w * rand(0.5, 0.9);
         let blockH = this.h * rand(0.4, 0.8);
         this.ctx.fillRect(this.w/2 - blockW/2, this.h/2 - blockH/2, blockW, blockH);
         
-        // Decorator lines
         this.ctx.strokeStyle = this.getColor();
-        this.ctx.lineWidth = rand(2, 10);
+        this.ctx.lineWidth = rand(6, 30); // Scaled up for 3x resolution
         this.ctx.beginPath();
         this.ctx.moveTo(this.w * 0.1, this.h * 0.1);
         this.ctx.lineTo(this.w * 0.9, this.h * 0.1);
         this.ctx.stroke();
 
-        // Accent shapes
         for(let i=0; i<3; i++) {
             this.ctx.fillStyle = this.getFillStyle(this.w, this.h, 0, 0);
             this.ctx.beginPath();
-            this.ctx.arc(rand(0, this.w), rand(0, this.h), rand(10, 100), 0, Math.PI*2);
+            this.ctx.arc(rand(0, this.w), rand(0, this.h), rand(30, 300), 0, Math.PI*2); // Scaled
             this.ctx.fill();
         }
     }
@@ -257,25 +250,22 @@ function generateDesign(specificSeed = null, skipHistory = false) {
     const seed = specificSeed || generateSeedStr();
     initPRNG(seed);
 
-    // Resolution
     const ratioStr = els.aspect.value;
     const res = RESOLUTIONS[ratioStr];
     canvas.width = res.w;
     canvas.height = res.h;
 
-    // Palette Resolution
     let palKey = els.palette.value;
     let colors = [];
     let palName = "";
 
-    // Handle Custom Colors
     let customStr = els.customColors.value.trim();
     if (customStr) {
         colors = customStr.split(",").map(c => c.trim()).filter(c => /^#[0-9A-F]{6}$/i.test(c));
         if(colors.length > 0) {
             palName = "Custom Colors";
         } else {
-            customStr = ""; // reset if invalid
+            customStr = "";
         }
     }
     
@@ -288,17 +278,14 @@ function generateDesign(specificSeed = null, skipHistory = false) {
         palName = PALETTES[palKey].name;
     }
 
-    // Style Resolution
     let styleKey = els.style.value;
     if (styleKey === "random") {
         const styles = ["minimalist", "geometric", "diagonal", "abstract", "editorial"];
         styleKey = randArr(styles);
     }
 
-    // Generate Name
     const designName = `${randArr(ADJECTIVES)} ${randArr(NOUNS)}`;
     
-    // Draw
     const generator = new PosterGenerator(ctx, {
         w: res.w, h: res.h,
         colors: colors,
@@ -314,19 +301,22 @@ function generateDesign(specificSeed = null, skipHistory = false) {
         case 'editorial': generator.drawEditorial(); break;
     }
 
-    // Save state
+    // Creating thumbnail at 10% size so LocalStorage doesn't explode from 3x huge images
+    const thumbCanvas = document.createElement("canvas");
+    thumbCanvas.width = res.w / 10;
+    thumbCanvas.height = res.h / 10;
+    thumbCanvas.getContext("2d").drawImage(canvas, 0, 0, thumbCanvas.width, thumbCanvas.height);
+
     state.currentDesign = {
         id: seed, name: designName, style: styleKey, palette: palName,
-        dataUrl: canvas.toDataURL("image/png", 0.9) // store thumbnail version
+        dataUrl: thumbCanvas.toDataURL("image/jpeg", 0.7)
     };
 
-    // Update UI
     els.seedInput.value = seed;
     els.metaName.innerText = designName;
     els.metaDetails.innerText = `Style: ${styleKey.toUpperCase()} | Palette: ${palName}`;
     checkFavoriteStatus();
 
-    // Add to history
     if (!skipHistory) {
         addToHistory(state.currentDesign);
     }
@@ -335,11 +325,18 @@ function generateDesign(specificSeed = null, skipHistory = false) {
 /* --- 6. HISTORY & FAVORITES MANAGEMENT --- */
 
 function addToHistory(design) {
-    // Avoid immediate duplicates in history display
     if (state.history.length > 0 && state.history[0].id === design.id) return;
     state.history.unshift(design);
     if (state.history.length > 50) state.history.pop();
-    localStorage.setItem("cpl_history", JSON.stringify(state.history));
+    
+    try {
+        localStorage.setItem("cpl_history", JSON.stringify(state.history));
+    } catch(e) {
+        console.warn("Storage full, clearing oldest items.");
+        state.history.length = 20; 
+        localStorage.setItem("cpl_history", JSON.stringify(state.history));
+    }
+    
     renderGrids();
 }
 
@@ -402,20 +399,17 @@ async function downloadAll() {
     if (state.history.length === 0) return alert("No designs in history!");
     if (typeof JSZip !== 'undefined') {
         const zip = new JSZip();
-        // Generate high res versions for recent 10 to avoid locking browser UI completely
-        const itemsToExport = state.history.slice(0, 10);
-        
-        // Save current UI state
+        // Limiting to 5 for massive 3x resolution to prevent browser crash
+        const itemsToExport = state.history.slice(0, 5); 
         const currentSeed = state.currentDesign.id;
         
         for (let i = 0; i < itemsToExport.length; i++) {
             const item = itemsToExport[i];
-            generateDesign(item.id, true); // Render to canvas
+            generateDesign(item.id, true);
             const data = canvas.toDataURL("image/png", 1.0).split(',')[1];
             zip.file(`${item.name.replace(/ /g, "_")}_${item.id}.png`, data, {base64: true});
         }
         
-        // Restore original UI
         generateDesign(currentSeed, true);
 
         const content = await zip.generateAsync({type:"blob"});
@@ -424,18 +418,143 @@ async function downloadAll() {
         link.download = "Poster_Designs.zip";
         link.click();
     } else {
-        alert("JSZip library not loaded. Downloading top 3 individually...");
-        for (let i = 0; i < Math.min(3, state.history.length); i++) {
-            generateDesign(state.history[i].id, true);
-            downloadCanvas(`Poster_${state.history[i].id}`);
-        }
+        alert("JSZip library not loaded.");
     }
 }
 
-/* --- 8. INITIALIZATION & EVENTS --- */
+/* --- 8. SVG EXPORT SYSTEM --- */
+class SVGContext {
+    constructor(w, h) {
+        this.w = w; this.h = h;
+        this.defs = ""; this.body = "";
+        this.gradCount = 0; this.gradients = [];
+        this.currentPath = "";
+        this.fillStyle = "#000000";
+        this.strokeStyle = "#000000";
+        this.lineWidth = 1;
+    }
+    
+    _formatColor(c) {
+        return typeof c === 'object' && c.id ? `url(#${c.id})` : c;
+    }
+
+    createLinearGradient(x0, y0, x1, y1) {
+        let id = "grad" + (++this.gradCount);
+        let grad = { id, type: 'linear', x0, y0, x1, y1, stops: [], addColorStop: function(off, col) { this.stops.push({off, col}); } };
+        this.gradients.push(grad);
+        return grad;
+    }
+
+    createRadialGradient(x0, y0, r0, x1, y1, r1) {
+        let id = "grad" + (++this.gradCount);
+        let grad = { id, type: 'radial', cx: x1, cy: y1, r: r1, stops: [], addColorStop: function(off, col) { this.stops.push({off, col}); } };
+        this.gradients.push(grad);
+        return grad;
+    }
+
+    fillRect(x, y, w, h) {
+        this.body += `<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="${this._formatColor(this.fillStyle)}" />\n`;
+    }
+
+    strokeRect(x, y, w, h) {
+        this.body += `<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="none" stroke="${this._formatColor(this.strokeStyle)}" stroke-width="${this.lineWidth}" />\n`;
+    }
+
+    beginPath() { this.currentPath = ""; }
+    moveTo(x, y) { this.currentPath += `M ${x} ${y} `; }
+    lineTo(x, y) { this.currentPath += `L ${x} ${y} `; }
+    
+    arc(x, y, r, start, end) {
+        this.currentPath += `M ${x-r}, ${y} a ${r},${r} 0 1,0 ${r*2},0 a ${r},${r} 0 1,0 -${r*2},0 `;
+    }
+    
+    rect(x, y, w, h) {
+        this.currentPath += `M ${x} ${y} h ${w} v ${h} h ${-w} Z `;
+    }
+
+    fill() {
+        this.body += `<path d="${this.currentPath}" fill="${this._formatColor(this.fillStyle)}" />\n`;
+    }
+
+    stroke() {
+        this.body += `<path d="${this.currentPath}" fill="none" stroke="${this._formatColor(this.strokeStyle)}" stroke-width="${this.lineWidth}" />\n`;
+    }
+
+    getSVG() {
+        this.gradients.forEach(g => {
+            if (g.type === 'linear') {
+                this.defs += `<linearGradient id="${g.id}" x1="${g.x0}" y1="${g.y0}" x2="${g.x1}" y2="${g.y1}" gradientUnits="userSpaceOnUse">\n`;
+            } else {
+                this.defs += `<radialGradient id="${g.id}" cx="${g.cx}" cy="${g.cy}" r="${g.r}" gradientUnits="userSpaceOnUse">\n`;
+            }
+            g.stops.forEach(s => {
+                let c = s.col;
+                if (c.includes('rgba') && c.includes(', 0)')) {
+                    c = c.replace(/rgba\((\d+),\s*(\d+),\s*(\d+),\s*0\)/, 'rgb($1, $2, $3)" stop-opacity="0');
+                }
+                this.defs += `<stop offset="${Math.round(s.off*100)}%" stop-color="${c}" />\n`;
+            });
+            if (g.type === 'linear') this.defs += `</linearGradient>\n`;
+            else this.defs += `</radialGradient>\n`;
+        });
+
+        return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${this.w} ${this.h}" width="${this.w}" height="${this.h}">
+            <defs>${this.defs}</defs>
+            ${this.body}
+        </svg>`;
+    }
+}
+
+function downloadSVG() {
+    if (!state.currentDesign) return;
+    
+    const seed = state.currentDesign.id;
+    initPRNG(seed);
+    
+    const ratioStr = els.aspect.value;
+    const res = RESOLUTIONS[ratioStr];
+    
+    let palKey = els.palette.value;
+    let colors = [];
+    let customStr = els.customColors.value.trim();
+    if (customStr) {
+        colors = customStr.split(",").map(c => c.trim()).filter(c => /^#[0-9A-F]{6}$/i.test(c));
+    }
+    if (colors.length === 0) {
+        if (palKey === "random") {
+            const keys = Object.keys(PALETTES).filter(k => k !== "random");
+            palKey = randArr(keys);
+        }
+        colors = PALETTES[palKey].colors;
+    }
+
+    const svgCtx = new SVGContext(res.w, res.h);
+    const generator = new PosterGenerator(svgCtx, {
+        w: res.w, h: res.h,
+        colors: colors,
+        mode: els.mode.value,
+        density: els.complexity.value
+    });
+
+    switch(state.currentDesign.style) {
+        case 'minimalist': generator.drawMinimalist(); break;
+        case 'geometric': generator.drawGeometric(); break;
+        case 'diagonal': generator.drawDiagonal(); break;
+        case 'abstract': generator.drawAbstract(); break;
+        case 'editorial': generator.drawEditorial(); break;
+    }
+
+    const blob = new Blob([svgCtx.getSVG()], {type: "image/svg+xml;charset=utf-8"});
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+    link.download = `${state.currentDesign.name.replace(/ /g, "_")}_${seed}.svg`;
+    link.click();
+}
+
+
+/* --- 9. INITIALIZATION & EVENTS --- */
 
 function initApp() {
-    // Populate Selects
     for (let key in PALETTES) {
         let opt = document.createElement("option");
         opt.value = key;
@@ -443,15 +562,13 @@ function initApp() {
         els.palette.appendChild(opt);
     }
 
-    // Event Listeners
     document.getElementById("btn-generate").addEventListener("click", () => generateDesign());
     
     document.getElementById("btn-generate-10").addEventListener("click", () => {
-        for(let i=0; i<10; i++) generateDesign(); // The last one will remain on canvas
+        for(let i=0; i<10; i++) generateDesign(); 
     });
     
     document.getElementById("btn-similar").addEventListener("click", () => {
-        // Keeps UI settings but generates new seed
         generateDesign(); 
     });
 
@@ -466,11 +583,15 @@ function initApp() {
     });
 
     els.btnFav.addEventListener("click", toggleFavorite);
+    
     document.getElementById("btn-download").addEventListener("click", () => {
         if(state.currentDesign) downloadCanvas(`${state.currentDesign.name}_${state.currentDesign.id}`);
     });
 
+    document.getElementById("btn-download-svg").addEventListener("click", downloadSVG);
+
     document.getElementById("btn-download-all").addEventListener("click", downloadAll);
+    
     document.getElementById("btn-clear-favorites").addEventListener("click", () => {
         if(confirm("Clear all favorites?")) {
             state.favorites = [];
@@ -485,7 +606,6 @@ function initApp() {
         alert("Seed copied to clipboard!");
     });
 
-    // Tab Navigation
     document.querySelectorAll(".nav-btn").forEach(btn => {
         btn.addEventListener("click", (e) => {
             document.querySelectorAll(".nav-btn").forEach(b => b.classList.remove("active"));
@@ -497,15 +617,12 @@ function initApp() {
             
             document.getElementById("tab-" + e.target.dataset.tab).classList.remove("hidden");
             
-            // Re-render grids if navigating away from generator
             if(e.target.dataset.tab !== "generator") renderGrids();
         });
     });
 
-    // First Render
     renderGrids();
     generateDesign();
 }
 
-// Start
 initApp();
